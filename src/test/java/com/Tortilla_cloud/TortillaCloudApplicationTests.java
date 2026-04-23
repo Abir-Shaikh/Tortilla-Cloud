@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ParothaCloudApplicationTests {
+class TortillaCloudApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
