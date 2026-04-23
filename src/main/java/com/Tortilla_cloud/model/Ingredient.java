@@ -1,4 +1,4 @@
-package com.parotha_cloud.model;
+package com.Tortilla_cloud.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +13,6 @@ public class Ingredient {
     private final Type type;
 
     public static enum Type{
-        WRAP , PROTEIN , VEGGIES , CHEESE , SAUCE 
+        WRAP , PROTEIN , VEGGIES , CHEESE , SAUCE
     }
 }
