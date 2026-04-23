@@ -1,0 +1,21 @@
+@startuml
+class Ingredient {
+  - String name
+  - String type
+}
+
+class Type {
+  - String typeName
+}
+
+class DesignTortillaController {
+  + showDesign()
+}
+
+class HomeController {
+  + home()
+}
+
+DesignTortillaController --> Ingredient
+DesignTortillaController --> Type
+@enduml
