@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Design Your Tortilla</title>
+</head>
+<body>
+<h1>Design Your Tortilla</h1>
+<img src="images/tortilla2.jpg" style="width: 500px; height: 500px;"/>
+
+<form method="post" th:object="${design}">
+    <div>
+        <label for="name">Name Your Tortilla Creation</label>
+        <input id="name" type="text" th:field="*{name}"/>
+    </div>
+
+    <h2>Designate your Wrap : </h2>
+    <div th:each="ingredient : ${wrap}">
+        <label>
+            <input type="checkbox" th:field="*{ingredients}" th:value="${ingredient.id}"/>
+            <span th:text="${ingredient.name}">Ingredient</span>
+        </label>
+    </div>
+
+    <h2>Pick your Protein : </h2>
+    <div th:each="ingredient : ${protein}">
+        <label>
+            <input type="checkbox" th:field="*{ingredients}" th:value="${ingredient.id}"/>
+            <span th:text="${ingredient.name}">Ingredient</span>
+        </label>
+    </div>
+
+    <h2>Determine your veggies : </h2>
+    <div th:each="ingredient : ${veggies}">
+        <label>
+            <input type="checkbox" th:field="*{ingredients}" th:value="${ingredient.id}"/>
+            <span th:text="${ingredient.name}">Ingredient</span>
+        </label>
+    </div>
+
+    <h2>Choose your cheese : </h2>
+    <div th:each="ingredient : ${cheese}">
+        <label>
+            <input type="checkbox" th:field="*{ingredients}" th:value="${ingredient.id}"/>
+            <span th:text="${ingredient.name}">Ingredient</span>
+        </label>
+    </div>
+
+    <h2>Select your sauce : </h2>
+    <div th:each="ingredient : ${sauce}">
+        <label>
+            <input type="checkbox" th:field="*{ingredients}" th:value="${ingredient.id}"/>
+            <span th:text="${ingredient.name}">Ingredient</span>
+        </label>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <button type="submit">Submit Your Tortilla</button>
+    </div>
+</form>
+</body>
+</html>
+
