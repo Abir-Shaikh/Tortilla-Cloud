@@ -1,85 +1,4 @@
-@startuml TortillaCloud_Architecture
-title Tortilla Cloud - Current Structure (from repo)
-
-skinparam shadowing false
-skinparam packageStyle rectangle
-skinparam componentStyle rectangle
-
-component "Spring MVC" as MVC
-component "Spring Data JPA" as JPA
-database "H2 DB (runtime)" as H2
-
-package "src/main/java/com/Tortilla_cloud/controller" as controllers {
-  component "HomeController" as HomeController <<Controller>>
-  component "DesignTortillaController" as DesignTortillaController <<Controller>>
-  component "OrdersCurrentController" as OrdersCurrentController <<Controller>>
-}
-
-package "src/main/java/com/Tortilla_cloud/model" as models {
-  component "Ingredient" as Ingredient <<Entity>>
-  component "Type" as Type <<Enum>>
-  component "Tortilla" as Tortilla <<Entity>>
-  component "Order" as Order <<Entity>>
-}
-
-package "src/main/java/com/Tortilla_cloud/repository" as repos {
-  interface "IngredientRepository" as IngredientRepository <<CrudRepository>>
-  interface "TortillaRepository" as TortillaRepository <<CrudRepository>>
-  interface "OrderRepository" as OrderRepository <<CrudRepository>>
-}
-
-package "src/main/resources/templates (Thymeleaf)" as views {
-  artifact "home.html" as home_html
-  artifact "design.html" as design_html
-  artifact "orderForm.html" as orderForm_html
-}
-
-package "src/main/resources/static" as static {
-  folder "images/" as images
-  artifact "tortilla1.jpg"
-  artifact "tortilla2.jpg"
-  artifact "parotta.png"
-}
-
-MVC -down-> controllers
-controllers ..> views : returns view name
-controllers ..> models : binds + validates
-
-JPA -down-> repos
-repos ..> models : persists
-JPA --> H2
-
-home_html ..> images
-design_html ..> controllers : POST /design
-orderForm_html ..> controllers : POST /orders
-
-Tortilla ..> Ingredient : ManyToMany
-Order ..> Tortilla : ManyToMany
-
-note right of DesignTortillaController
-Today: ingredients are hard-coded (in-memory list).
-Repositories exist but are not wired into controllers yet.
-end note
-
-@enduml
-
-@startuml TortillaCloud_Domain_Model
-title Tortilla Cloud - Domain Model (from repo)
-
-skinparam shadowing false
-skinparam classAttributeIconSize 0
-
-class Ingredient <<Entity>>
-enum Type
-class Tortilla <<Entity>>
-class Order <<Entity>>
-
-Tortilla "1" -- "*" Ingredient : ingredients\n@ManyToMany
-Order "1" -- "*" Tortilla : tortillas\n@ManyToMany
-
-@enduml
-
-@startuml TortillaCloud_Current_Flow
+@startuml TortillaCloud_Current_Request_Flow
 title Tortilla Cloud - Current Request Flow
 
 skinparam shadowing false
@@ -112,6 +31,7 @@ participant "Thymeleaf home.html" as home_html
 participant "Thymeleaf design.html" as design_html
 participant "Thymeleaf orderForm.html" as orderForm_html
 
+' Future (declared up-front to match the reference layout)
 database "Database" as DB
 participant AuthController
 participant CartController
@@ -209,68 +129,3 @@ end note
 
 @enduml
 
-@startuml TortillaCloud_Future_Flow
-title Tortilla Cloud - Future Flow (login + cart + payment gateway + next additions)
-
-skinparam shadowing false
-skinparam activity {
-  BackgroundColor #111009
-  BorderColor #3a3326
-  FontColor #e9e2d4
-}
-
-start
-:GET / (Home);
-:Browse menu / featured items;
-
-if (Authenticated?) then (yes)
-  :Continue as logged-in user;
-else (no)
-  :Register / Login;
-endif
-
-:Add items to Cart;
-:View Cart (/cart);
-:Edit quantities / remove items;
-
-if (Has saved address?) then (yes)
-  :Select address;
-else (no)
-  :Add delivery address;
-endif
-
-:Checkout (/checkout);
-:Apply coupon / offer (optional);
-:Choose delivery slot (optional);
-
-:Select payment method;
-if (Online payment?) then (yes)
-  :Create PaymentIntent / Order draft;
-  :Redirect to Payment Gateway (Stripe/Razorpay/PayPal);
-  :Gateway callback + webhook verification;
-  if (Payment succeeded?) then (yes)
-    :Confirm order;
-  else (no)
-    :Show payment failed + retry;
-  endif
-else (Cash on delivery)
-  :Confirm order (cash on delivery);
-endif
-
-:Order confirmation page;
-:Send notifications (email/SMS/WhatsApp);
-:Order tracking (optional);
-:Order history (/account/orders);
-stop
-
-note right
-Suggested next additions beyond login/cart/payments:
-- Admin dashboard (manage menu, pricing, availability)
-- Inventory + ingredient availability gating
-- Reviews/ratings
-- Delivery partner assignment + status updates
-- Refunds + cancellations + payment reconciliation
-- Observability: audit logs, metrics, error tracking
-end note
-
-@enduml
