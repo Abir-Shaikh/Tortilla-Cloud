@@ -23,10 +23,10 @@ class TortillaCloudApplicationTests {
 
 	@Test
 	void homePageLoads() throws Exception{
-		mockMvc.perform(get("/api"))
+		mockMvc.perform(get("/"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("home"))
-				.andExpect(content().string(containsString("Parotha Cloud")));
+				.andExpect(content().string(containsString("Tortilla Cloud")));
 	}
 
 }
