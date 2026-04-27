@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -47,6 +47,18 @@
         .logo span { color: var(--accent); }
         .nav-right { display: flex; align-items: center; gap: 1.5rem; }
         .step-label { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+        .logout-btn{
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .62rem; letter-spacing: .15em; text-transform: uppercase;
+            color: var(--muted);
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: .45rem .7rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: color .2s, border-color .2s, background .2s;
+        }
+        .logout-btn:hover{ color: var(--dark); border-color: var(--muted); background: rgba(250,247,242,0.55); }
 
         .theme-btn {
             background: var(--surface); border: 1px solid var(--border);
@@ -170,6 +182,10 @@
     <div class="logo">Tortilla<span>Cloud</span></div>
     <div class="nav-right">
         <span class="step-label">Step 02 / Order</span>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display:inline;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
         <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
             <span class="theme-icon icon-sun">☀</span>
             <span class="theme-icon icon-moon">☽</span>
