@@ -6,6 +6,7 @@ skinparam packageStyle rectangle
 skinparam componentStyle rectangle
 
 component "Spring MVC" as MVC
+component "Spring Security" as Security
 component "Spring Data JPA" as JPA
 database "H2 DB (runtime)" as H2
 
@@ -13,6 +14,10 @@ package "src/main/java/com/Tortilla_cloud/controller" as controllers {
   component "HomeController" as HomeController <<Controller>>
   component "DesignTortillaController" as DesignTortillaController <<Controller>>
   component "OrdersCurrentController" as OrdersCurrentController <<Controller>>
+}
+
+package "src/main/java/com/Tortilla_cloud/security" as security_pkg {
+  component "SecurityConfig" as SecurityConfig <<Configuration>>
 }
 
 package "src/main/java/com/Tortilla_cloud/model" as models {
@@ -30,6 +35,7 @@ package "src/main/java/com/Tortilla_cloud/repository" as repos {
 
 package "src/main/resources/templates (Thymeleaf)" as views {
   artifact "home.html" as home_html
+  artifact "login.html" as login_html
   artifact "design.html" as design_html
   artifact "orderForm.html" as orderForm_html
 }
@@ -41,6 +47,8 @@ package "src/main/resources/static" as static {
   artifact "parotta.png"
 }
 
+Security -down-> MVC : filter chain\n(authn/authz)
+Security ..> SecurityConfig
 MVC -down-> controllers
 controllers ..> views : returns view name
 controllers ..> models : binds + validates
@@ -50,6 +58,8 @@ repos ..> models : persists
 JPA --> H2
 
 home_html ..> images
+login_html ..> Security : POST /login (handled by Spring Security)
+home_html ..> Security : POST /logout (CSRF)
 design_html ..> controllers : POST /design
 orderForm_html ..> controllers : POST /orders
 
@@ -59,6 +69,13 @@ Order ..> Tortilla : ManyToMany
 note right of DesignTortillaController
 Today: ingredients are hard-coded (in-memory list).
 Repositories exist but are not wired into controllers yet.
+end note
+
+note right of SecurityConfig
+Form login enabled:
+- GET /login -> HomeController returns login.html
+- POST /login handled by Spring Security
+- /design and /orders/** require authentication
 end note
 
 @enduml
@@ -74,8 +91,8 @@ enum Type
 class Tortilla <<Entity>>
 class Order <<Entity>>
 
-Tortilla "1" -- "*" Ingredient : ingredients\n@ManyToMany
-Order "1" -- "*" Tortilla : tortillas\n@ManyToMany
+Tortilla "*" -- "*" Ingredient : ingredients\n@ManyToMany (unidirectional)
+Order "*" -- "*" Tortilla : tortillas\n@ManyToMany (unidirectional)
 
 @enduml
 
@@ -101,6 +118,7 @@ skinparam sequence {
 
 actor Customer
 participant Browser
+participant "Spring Security\n(FilterChain)" as Security
 participant HomeController
 participant DesignTortillaController
 participant OrdersCurrentController
@@ -109,6 +127,7 @@ participant "Sample Ingredient List" as IngredientList
 participant "Type enum" as TypeEnum
 
 participant "Thymeleaf home.html" as home_html
+participant "Thymeleaf login.html" as login_html
 participant "Thymeleaf design.html" as design_html
 participant "Thymeleaf orderForm.html" as orderForm_html
 
@@ -121,14 +140,50 @@ participant "Payment Gateway" as Gateway
 
 == Home Page ==
 Customer -> Browser : Open application
-Browser -> HomeController : GET /
+Browser -> Security : GET /
+Security -> HomeController : Allowed (permitAll)
 HomeController -> home_html : return "home"
 home_html --> Browser : Render homepage
 Browser --> Customer : Show landing page
 
+== Login (Security) ==
+note right of Security
+Form login configured:
+- GET /login renders a custom template
+- POST /login handled by Spring Security
+- On success, redirect -> /design
+- On failure, redirect -> /login?error
+Logout:
+- POST /logout (CSRF protected)
+- Redirect -> /login?logout
+end note
+
 == Design Page ==
 Customer -> Browser : Open /design
-Browser -> DesignTortillaController : GET /design
+Browser -> Security : GET /design
+alt Not authenticated
+  Security --> Browser : 302 Redirect -> /login
+  Browser -> Security : GET /login
+  Security -> HomeController : Allowed (permitAll)
+  HomeController -> login_html : return "login"
+  login_html --> Browser : Render login page
+  Browser --> Customer : Show login form
+
+  Customer -> Browser : Submit credentials
+  Browser -> Security : POST /login (username, password, _csrf)
+  alt Invalid credentials
+    Security --> Browser : 302 Redirect -> /login?error
+    Browser -> Security : GET /login?error
+    Security -> HomeController : Allowed (permitAll)
+    HomeController -> login_html : return "login"
+    login_html --> Browser : Render error message
+  else Valid credentials
+    Security --> Browser : 302 Redirect -> /design
+    Browser -> Security : GET /design
+  end
+end
+
+Security -> DesignTortillaController : Allowed (authenticated)
 DesignTortillaController -> IngredientList : getIngredients()
 IngredientList --> DesignTortillaController : ingredients
 DesignTortillaController -> TypeEnum : read enum values
@@ -136,9 +191,8 @@ TypeEnum --> DesignTortillaController : types
 
 note right of DesignTortillaController
 Adds model attributes:
-- ingredients
-- types
-- tortilla (form backing)
+- wrap / protein / veggies / cheese / sauce (lists)
+- design (form backing)
 end note
 
 DesignTortillaController -> design_html : return "design" with model
@@ -146,7 +200,8 @@ design_html --> Browser : Render design page
 Browser --> Customer : Show design page
 
 Customer -> Browser : Submit tortilla design
-Browser -> DesignTortillaController : POST /design (Tortilla)
+Browser -> Security : POST /design (Tortilla, _csrf)
+Security -> DesignTortillaController : Allowed (authenticated)
 alt Validation errors
   DesignTortillaController -> design_html : return "design" with errors
   design_html --> Browser : Render errors
@@ -155,12 +210,14 @@ else Valid
 end
 
 == Order Page ==
-Browser -> OrdersCurrentController : GET /orders/current
+Browser -> Security : GET /orders/current
+Security -> OrdersCurrentController : Allowed (authenticated)
 OrdersCurrentController -> orderForm_html : return "orderForm"
 orderForm_html --> Browser : Render order form
 
 Customer -> Browser : Submit order
-Browser -> OrdersCurrentController : POST /orders (Order)
+Browser -> Security : POST /orders (Order, _csrf)
+Security -> OrdersCurrentController : Allowed (authenticated)
 alt Validation errors
   OrdersCurrentController -> orderForm_html : return "orderForm" with errors
   orderForm_html --> Browser : Render errors
@@ -168,12 +225,22 @@ else Valid
   OrdersCurrentController --> Browser : Redirect -> /
 end
 
+== Logout ==
+Customer -> Browser : Click Logout
+Browser -> Security : POST /logout (_csrf)
+Security --> Browser : 302 Redirect -> /login?logout
+Browser -> Security : GET /login?logout
+Security -> HomeController : Allowed (permitAll)
+HomeController -> login_html : return "login"
+login_html --> Browser : Render logout message
+
 note left of Browser
 Current state:
 - Server-rendered Spring MVC app
 - Thymeleaf templates for UI
 - Ingredients are hard-coded (in-memory list)
-- No database persistence wired yet
+- JPA + H2 are configured, but controllers don't persist orders/designs yet
+- Spring Security form login is enabled with a custom /login page
 end note
 
 == Future Additions ==
@@ -186,7 +253,7 @@ Browser -> CartController : POST /cart
 CartController -> DB : validate item / update cart
 DB --> CartController : updated cart state
 
-Browser -> AuthController : POST /login
+Browser -> AuthController : POST /register / login
 AuthController -> DB : validate user / create session
 DB --> AuthController : user/session data
 
@@ -202,7 +269,7 @@ note left of Browser
 Recommended next steps:
 - Add services (IngredientService, OrderService)
 - Wire repositories + persistence (JPA)
-- Add login/session handling
+- Add real users (UserDetailsService + password encoding) instead of generated dev password
 - Add cart + checkout controllers
 - Integrate a payment gateway
 end note
@@ -210,7 +277,7 @@ end note
 @enduml
 
 @startuml TortillaCloud_Future_Flow
-title Tortilla Cloud - Future Flow (login + cart + payment gateway + next additions)
+title Tortilla Cloud - Future Flow (after persistence + real users + cart + payment gateway)
 
 skinparam shadowing false
 skinparam activity {
