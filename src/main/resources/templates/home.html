@@ -1,13 +1,337 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<!--<html xmlns="http://www.w3.org/1999/xhtml"-->
-<!--      xmlns:th="http://www.thymeleaf.org">-->
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Tortilla Cloud - Online food delivery for Tortilla's</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Tortilla Cloud</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Instrument+Sans:wght@400;500&display=swap');
+
+    :root{
+        --color-background-primary:#faf7f2;
+        --color-background-secondary:#ffffff;
+        --color-text-primary:#1a1208;
+        --color-text-secondary:#4a3f2f;
+        --color-text-tertiary:#9c8f7a;
+        --color-border-primary:#d8cbb3;
+        --color-border-secondary:#e8e0d0;
+        --color-border-tertiary:#eee6d7;
+    }
+
+    html,body{height:100%;}
+    body{margin:0;background:var(--color-background-primary);color:var(--color-text-primary);}
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    .pg{font-family:'Instrument Sans',sans-serif;background:var(--color-background-primary);color:var(--color-text-primary);}
+
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:0.5px solid var(--color-border-tertiary);}
+    .nav-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:0.04em;color:var(--color-text-primary);}
+    .nav-logo span{color:#1a1a1a;opacity:0.35;}
+    .nav-link{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-secondary);text-decoration:none;transition:color 0.15s;}
+    .nav-link:hover{color:var(--color-text-primary);}
+    .nav-cta{font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-primary);background:transparent;border:0.5px solid var(--color-border-primary);padding:8px 18px;border-radius:2px;cursor:pointer;text-decoration:none;transition:background 0.15s;}
+    .nav-cta:hover{background:var(--color-background-secondary);}
+
+    .hero{display:grid;grid-template-columns:1fr 1fr;min-height:420px;border-bottom:0.5px solid var(--color-border-tertiary);}
+    .hero-left{padding:56px 40px 56px 32px;display:flex;flex-direction:column;justify-content:center;border-right:0.5px solid var(--color-border-tertiary);}
+    .hero-eyebrow{font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:20px;}
+    .hero-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,4rem);font-weight:600;line-height:1.05;color:var(--color-text-primary);margin-bottom:20px;}
+    .hero-sub{font-size:13px;line-height:1.8;color:var(--color-text-secondary);max-width:320px;margin-bottom:36px;font-weight:400;}
+    .hero-actions{display:flex;align-items:center;gap:20px;}
+    .btn-primary{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-primary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);padding:12px 24px;border-radius:2px;cursor:pointer;text-decoration:none;transition:background 0.15s;}
+    .btn-primary:hover{background:var(--color-border-tertiary);}
+    .btn-ghost{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-secondary);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.15s;}
+    .btn-ghost:hover{color:var(--color-text-primary);}
+    .hero-right{padding:40px 32px;background:var(--color-background-secondary);display:flex;flex-direction:column;justify-content:flex-end;}
+    .hero-stat-row{display:flex;gap:32px;margin-top:auto;}
+    .hero-stat{display:flex;flex-direction:column;gap:4px;}
+    .hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--color-text-primary);line-height:1;}
+    .hero-stat-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-tertiary);}
+    .hero-img-placeholder{flex:1;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--color-border-tertiary);border-radius:2px;margin-bottom:28px;min-height:200px;background:var(--color-background-primary);}
+    .hero-img-text{font-family:'Cormorant Garamond',serif;font-size:3.5rem;opacity:0.06;user-select:none;}
+
+    .section-bar{display:flex;align-items:center;justify-content:space-between;padding:24px 32px 20px;border-bottom:0.5px solid var(--color-border-tertiary);}
+    .section-label{font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-text-tertiary);}
+
+    .filter-row{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);padding:0 32px;}
+    .filter-btn{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-tertiary);background:transparent;border:none;border-bottom:1.5px solid transparent;padding:14px 20px 12px;cursor:pointer;transition:color 0.15s,border-color 0.15s;}
+    .filter-btn:first-child{padding-left:0;}
+    .filter-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);}
+    .filter-btn:hover{color:var(--color-text-secondary);}
+
+    .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0;border-left:0.5px solid var(--color-border-tertiary);}
+    .menu-item{padding:20px 20px 18px;border-right:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background 0.12s;position:relative;}
+    .menu-item:hover{background:var(--color-background-secondary);}
+    .menu-item.chef{background:var(--color-background-secondary);}
+    .item-tag{font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:10px;}
+    .item-tag.spicy{color:#993C1D;}
+    .item-tag.vegan{color:#3B6D11;}
+    .item-tag.new{color:#185FA5;}
+    .item-tag.gf{color:#534AB7;}
+    .item-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--color-text-primary);margin-bottom:5px;line-height:1.2;}
+    .item-desc{font-size:11px;color:var(--color-text-tertiary);line-height:1.6;font-weight:400;}
+    .chef-dot{width:5px;height:5px;border-radius:50%;background:var(--color-text-primary);position:absolute;top:20px;right:20px;}
+
+    .bottom-bar{display:grid;grid-template-columns:1fr 1fr;border-top:0.5px solid var(--color-border-tertiary);}
+    .bb-left{padding:36px 32px;border-right:0.5px solid var(--color-border-tertiary);}
+    .bb-right{padding:36px 32px;display:flex;align-items:center;justify-content:flex-end;}
+    .bb-heading{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--color-text-primary);margin-bottom:8px;}
+    .bb-sub{font-size:12px;color:var(--color-text-secondary);line-height:1.7;}
+
+    .skel-grid{display:grid;grid-template-columns:repeat(4,1fr);border-left:0.5px solid var(--color-border-tertiary);}
+    .skel-card{padding:20px;border-right:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;gap:10px;}
+
+    .skel-pulse{animation:sk 1.6s ease-in-out infinite;}
+    @keyframes sk{0%,100%{opacity:0.3;}50%{opacity:0.7;}}
+    .skel-block{background:var(--color-border-tertiary);border-radius:2px;}
+</style>
 </head>
 <body>
-<h1>Welcome to Tortilla Cloud</h1>
-<img src="images/tortilla1.jpg" style="width: 500px; height: 500px;"/>
+
+<div class="pg" id="pg">
+
+    <div id="skel">
+        <div class="nav">
+            <div class="skel-block skel-pulse" style="width:120px;height:16px;"></div>
+            <div style="display:flex;gap:24px;">
+                <div class="skel-block skel-pulse" style="width:50px;height:12px;"></div>
+                <div class="skel-block skel-pulse" style="width:50px;height:12px;"></div>
+                <div class="skel-block skel-pulse" style="width:70px;height:30px;border-radius:2px;"></div>
+            </div>
+        </div>
+        <div class="hero">
+            <div style="padding:56px 40px 56px 32px;border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;gap:16px;">
+                <div class="skel-block skel-pulse" style="width:90px;height:10px;"></div>
+                <div class="skel-block skel-pulse" style="width:80%;height:52px;"></div>
+                <div class="skel-block skel-pulse" style="width:65%;height:52px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:13px;margin-top:8px;"></div>
+                <div class="skel-block skel-pulse" style="width:80%;height:13px;"></div>
+                <div style="display:flex;gap:16px;margin-top:12px;">
+                    <div class="skel-block skel-pulse" style="width:120px;height:38px;border-radius:2px;"></div>
+                    <div class="skel-block skel-pulse" style="width:80px;height:38px;border-radius:2px;"></div>
+                </div>
+            </div>
+            <div style="padding:40px 32px;background:var(--color-background-secondary);display:flex;flex-direction:column;gap:16px;">
+                <div class="skel-block skel-pulse" style="flex:1;min-height:200px;border-radius:2px;"></div>
+                <div style="display:flex;gap:32px;">
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div class="skel-block skel-pulse" style="width:40px;height:28px;"></div>
+                        <div class="skel-block skel-pulse" style="width:70px;height:10px;"></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div class="skel-block skel-pulse" style="width:40px;height:28px;"></div>
+                        <div class="skel-block skel-pulse" style="width:70px;height:10px;"></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div class="skel-block skel-pulse" style="width:40px;height:28px;"></div>
+                        <div class="skel-block skel-pulse" style="width:70px;height:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding:24px 32px 20px;border-bottom:0.5px solid var(--color-border-tertiary);">
+            <div class="skel-block skel-pulse" style="width:100px;height:10px;"></div>
+        </div>
+        <div class="skel-grid">
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-block skel-pulse" style="width:50px;height:9px;"></div>
+                <div class="skel-block skel-pulse" style="width:85%;height:15px;"></div>
+                <div class="skel-block skel-pulse" style="width:100%;height:11px;"></div>
+                <div class="skel-block skel-pulse" style="width:70%;height:11px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main" style="display:none;">
+        <div class="nav">
+            <div class="nav-logo">Taco<span>/</span>Cloud</div>
+            <div style="display:flex;align-items:center;gap:28px;">
+                <a href="#" class="nav-link">Menu</a>
+                <a href="#" class="nav-link">About</a>
+                <a href="/design" class="nav-cta">Design your taco</a>
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="hero-left">
+                <div class="hero-eyebrow">Handcrafted in small batches</div>
+                <h1 class="hero-h1">Tortillas worth<br>talking about.</h1>
+                <p class="hero-sub">Twenty distinct varieties. Each one pressed fresh, seasoned with intent, and made to hold something extraordinary.</p>
+                <div class="hero-actions">
+                    <a href="/design" class="btn-primary">Build your taco</a>
+                    <a href="#menu" class="btn-ghost">Explore menu <span style="font-size:14px;">→</span></a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="hero-img-placeholder">
+                    <span class="hero-img-text">TC</span>
+                </div>
+                <div class="hero-stat-row">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">20</span>
+                        <span class="hero-stat-label">Tortilla varieties</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">100%</span>
+                        <span class="hero-stat-label">Fresh daily</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">6</span>
+                        <span class="hero-stat-label">Dietary options</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-bar" id="menu">
+            <span class="section-label">Our tortillas — 20 varieties</span>
+            <span class="section-label" id="filter-label">Showing all</span>
+        </div>
+
+        <div class="filter-row">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="spicy">Spicy</button>
+            <button class="filter-btn" data-filter="vegan">Vegan</button>
+            <button class="filter-btn" data-filter="new">New</button>
+            <button class="filter-btn" data-filter="gf">Gluten-free</button>
+            <button class="filter-btn" data-filter="chef">Chef's pick</button>
+        </div>
+
+        <div class="menu-grid" id="menu-grid"></div>
+
+        <div class="bottom-bar">
+            <div class="bb-left">
+                <div class="bb-heading">Ready to compose?</div>
+                <p class="bb-sub">Pick your base, layer your fillings, and build something worth remembering. Takes under two minutes.</p>
+            </div>
+            <div class="bb-right">
+                <a href="/design" class="btn-primary" style="font-size:11px;">Start designing →</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const items=[
+        {name:"Classic flour",desc:"Soft, pliable, the benchmark everything else is measured against",tag:"popular",tagLabel:"Popular",chef:true},
+        {name:"Yellow corn",desc:"Stone-ground, earthy, crisps beautifully on an open flame",tag:"vegan",tagLabel:"Vegan",chef:false},
+        {name:"Chipotle chili",desc:"Smoky capsaicin woven through every layer of the dough",tag:"spicy",tagLabel:"Spicy",chef:true},
+        {name:"Avocado & spinach",desc:"Cold-pressed avocado oil, vibrant green, rich in healthy fats",tag:"vegan",tagLabel:"Vegan",chef:false},
+        {name:"Cheese-stuffed",desc:"Double-layer casing with molten cheddar sealed inside",tag:"popular",tagLabel:"Popular",chef:false},
+        {name:"Ghost pepper",desc:"Extreme Scoville. For guests who know exactly what they want.",tag:"spicy",tagLabel:"Spicy",chef:false},
+        {name:"Sweet potato",desc:"Roasted and folded in, adding natural sweetness and colour",tag:"new",tagLabel:"New",chef:false},
+        {name:"Herb & garlic",desc:"Rosemary, thyme, slow-roasted garlic, pressed flat",tag:"vegan",tagLabel:"Vegan",chef:true},
+        {name:"Whole wheat",desc:"High fibre, nutty depth, satisfying structural integrity",tag:"popular",tagLabel:"Popular",chef:false},
+        {name:"Squid ink",desc:"Dramatic jet-black surface, subtle briny mineral note",tag:"new",tagLabel:"New",chef:true},
+        {name:"Beet & rose",desc:"Naturally crimson, earthy sweetness, striking presentation",tag:"new",tagLabel:"New",chef:false},
+        {name:"Turmeric golden",desc:"Anti-inflammatory base with a warm, mellow spice character",tag:"vegan",tagLabel:"Vegan",chef:false},
+        {name:"Sourdough wrap",desc:"Long-fermented levain dough with proper tang and chew",tag:"popular",tagLabel:"Popular",chef:true},
+        {name:"Gluten-free blend",desc:"Rice and tapioca flour — indistinguishable from the original",tag:"gf",tagLabel:"Gluten-free",chef:false},
+        {name:"Blue corn",desc:"Antioxidant-rich heirloom grain, slightly firmer texture",tag:"vegan",tagLabel:"Vegan",chef:false},
+        {name:"Pumpkin & sage",desc:"Autumn spice profile with roasted seeds folded through",tag:"new",tagLabel:"New",chef:false},
+        {name:"Lemon & pepper",desc:"Sharp citrus zest with cracked black pepper, bright finish",tag:"popular",tagLabel:"Popular",chef:false},
+        {name:"Hibiscus",desc:"Floral, tart, tropical — pairs with ceviche and citrus fillings",tag:"new",tagLabel:"New",chef:true},
+        {name:"Extra-virgin olive",desc:"Cold-press oil base, paper-thin, bakes up with crisp edges",tag:"vegan",tagLabel:"Vegan",chef:false},
+        {name:"Dark cacao",desc:"70% cacao folded in — designed exclusively for dessert tacos",tag:"new",tagLabel:"New",chef:true},
+    ];
+
+    function renderGrid(filter){
+        const grid=document.getElementById('menu-grid');
+        const label=document.getElementById('filter-label');
+        const filtered=filter==='all'?items:filter==='chef'?items.filter(i=>i.chef):items.filter(i=>i.tag===filter);
+        label.textContent=`Showing ${filtered.length}`;
+        grid.innerHTML=filtered.map(i=>`
+    <div class="menu-item${i.chef?' chef':''}" onclick="window.location.href='/design'">
+      ${i.chef?'<div class="chef-dot"></div>':''}
+      <div class="item-tag ${i.tag}">${i.tagLabel}</div>
+      <div class="item-name">${i.name}</div>
+      <div class="item-desc">${i.desc}</div>
+    </div>`).join('');
+    }
+
+    setTimeout(()=>{
+        document.getElementById('skel').style.display='none';
+        document.getElementById('main').style.display='block';
+        renderGrid('all');
+        document.querySelectorAll('.filter-btn').forEach(btn=>{
+            btn.addEventListener('click',function(){
+                document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+                this.classList.add('active');
+                renderGrid(this.dataset.filter);
+            });
+        });
+    },1600);
+</script>
+
 </body>
 </html>
