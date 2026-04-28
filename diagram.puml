@@ -14,10 +14,16 @@ package "src/main/java/com/Tortilla_cloud/controller" as controllers {
   component "HomeController" as HomeController <<Controller>>
   component "DesignTortillaController" as DesignTortillaController <<Controller>>
   component "OrdersCurrentController" as OrdersCurrentController <<Controller>>
+  component "RegistrationController" as RegistrationController <<Controller>>
 }
 
 package "src/main/java/com/Tortilla_cloud/security" as security_pkg {
   component "SecurityConfig" as SecurityConfig <<Configuration>>
+  component "RegistrationForm" as RegistrationForm
+}
+
+package "src/main/java/com/Tortilla_cloud/service" as services {
+  component "UserRepositoryUserDetailsService" as UserDetailsService <<Service>>
 }
 
 package "src/main/java/com/Tortilla_cloud/model" as models {
@@ -25,17 +31,20 @@ package "src/main/java/com/Tortilla_cloud/model" as models {
   component "Type" as Type <<Enum>>
   component "Tortilla" as Tortilla <<Entity>>
   component "Order" as Order <<Entity>>
+  component "User" as User <<Entity>>
 }
 
 package "src/main/java/com/Tortilla_cloud/repository" as repos {
   interface "IngredientRepository" as IngredientRepository <<CrudRepository>>
   interface "TortillaRepository" as TortillaRepository <<CrudRepository>>
   interface "OrderRepository" as OrderRepository <<CrudRepository>>
+  interface "UserRepository" as UserRepository <<CrudRepository>>
 }
 
 package "src/main/resources/templates (Thymeleaf)" as views {
   artifact "home.html" as home_html
   artifact "login.html" as login_html
+  artifact "registration.html" as registration_html
   artifact "design.html" as design_html
   artifact "orderForm.html" as orderForm_html
 }
@@ -57,24 +66,31 @@ JPA -down-> repos
 repos ..> models : persists
 JPA --> H2
 
+UserDetailsService ..> UserRepository : loads user by username
+UserRepository ..> User : persists
+RegistrationController ..> RegistrationForm : binds signup data
+RegistrationForm ..> User : creates User (password encoded)
+
 home_html ..> images
 login_html ..> Security : POST /login (handled by Spring Security)
+registration_html ..> RegistrationController : POST /register
 home_html ..> Security : POST /logout (CSRF)
 design_html ..> controllers : POST /design
-orderForm_html ..> controllers : POST /orders
+orderForm_html ..> controllers : POST /orders/current
 
 Tortilla ..> Ingredient : ManyToMany
 Order ..> Tortilla : ManyToMany
 
 note right of DesignTortillaController
 Today: ingredients are hard-coded (in-memory list).
-Repositories exist but are not wired into controllers yet.
+Designs and orders are not persisted yet (controllers only log + redirect).
 end note
 
 note right of SecurityConfig
 Form login enabled:
 - GET /login -> HomeController returns login.html
 - POST /login handled by Spring Security
+- GET/POST /register are permitAll (public)
 - /design and /orders/** require authentication
 end note
 
@@ -90,9 +106,13 @@ class Ingredient <<Entity>>
 enum Type
 class Tortilla <<Entity>>
 class Order <<Entity>>
+class User <<Entity,UserDetails>>
+class RegistrationForm
 
 Tortilla "*" -- "*" Ingredient : ingredients\n@ManyToMany (unidirectional)
 Order "*" -- "*" Tortilla : tortillas\n@ManyToMany (unidirectional)
+
+RegistrationForm ..> User : toUser(passwordEncoder)
 
 @enduml
 

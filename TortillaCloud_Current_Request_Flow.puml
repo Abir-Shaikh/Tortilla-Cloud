@@ -30,6 +30,7 @@ participant "Type enum" as TypeEnum
 
 participant "Thymeleaf home.html" as home_html
 participant "Thymeleaf login.html" as login_html
+participant "Thymeleaf registration.html" as registration_html
 participant "Thymeleaf design.html" as design_html
 participant "Thymeleaf orderForm.html" as orderForm_html
 
@@ -60,6 +61,27 @@ Logout:
 - POST /logout (CSRF protected)
 - Redirect -> /login?logout
 end note
+
+== Registration (Public) ==
+Customer -> Browser : Open /register
+Browser -> Security : GET /register
+Security -> RegistrationController : Allowed (permitAll)
+RegistrationController -> registration_html : return "registration"
+registration_html --> Browser : Render sign up page
+Browser --> Customer : Show sign up form
+
+Customer -> Browser : Submit sign up
+Browser -> Security : POST /register (form fields, _csrf)
+Security -> RegistrationController : Allowed (permitAll)
+alt Missing or invalid password/fields
+  RegistrationController --> Browser : 500/400 (binding/validation error)
+else Valid
+  RegistrationController --> Browser : 302 Redirect -> /login
+  Browser -> Security : GET /login
+  Security -> HomeController : Allowed (permitAll)
+  HomeController -> login_html : return "login"
+  login_html --> Browser : Render login page
+end
 
 == Design Page ==
 Customer -> Browser : Open /design
@@ -119,7 +141,7 @@ OrdersCurrentController -> orderForm_html : return "orderForm"
 orderForm_html --> Browser : Render order form
 
 Customer -> Browser : Submit order
-Browser -> Security : POST /orders (Order, _csrf)
+Browser -> Security : POST /orders/current (Order, _csrf)
 Security -> OrdersCurrentController : Allowed (authenticated)
 alt Validation errors
   OrdersCurrentController -> orderForm_html : return "orderForm" with errors
@@ -142,7 +164,8 @@ Current state:
 - Server-rendered Spring MVC app
 - Thymeleaf templates for UI
 - Ingredients are hard-coded (in-memory list)
-- JPA + H2 are configured, but controllers don't persist orders/designs yet
+- JPA + H2 are configured; users are persisted (registration + login via DB)
+- Controllers still don't persist orders/designs yet
 - Spring Security form login is enabled with a custom /login page
 end note
 
