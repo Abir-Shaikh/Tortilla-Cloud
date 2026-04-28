@@ -59,6 +59,6 @@ public class Order {
 
     @PrePersist
     void placedAt(){
-        this.placedAt = placedAt;
+        this.placedAt = new Date();
     }
 }

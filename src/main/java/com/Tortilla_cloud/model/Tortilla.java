@@ -30,7 +30,7 @@ public class Tortilla {
 
     @PrePersist
     void createdAt(){
-        this.createdAt = createdAt;
+        this.createdAt = new Date();
     }
 }
 
