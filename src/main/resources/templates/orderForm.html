@@ -199,7 +199,10 @@
         <p class="page-sub">Where should we send your tortilla?</p>
     </div>
 
-    <form method="post" th:action="@{/orders}" th:object="${order}">
+    <form method="post"
+          th:action="@{/orders/current}"
+          th:object="${order}">
+
         <div class="form-grid">
 
             <!-- ── DELIVERY ── -->

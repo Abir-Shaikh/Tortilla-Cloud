@@ -23,6 +23,21 @@
             --shadow:0 10px 30px rgba(26,18,8,0.06);
         }
 
+        html[data-theme="dark"]{
+            --color-background-primary:#0f0f10;
+            --color-background-secondary:#161618;
+            --color-text-primary:#f2eee7;
+            --color-text-secondary:#cdbfae;
+            --color-text-tertiary:#9c8f7a;
+            --color-border-primary:#3a342b;
+            --color-border-secondary:#2a251f;
+            --color-border-tertiary:#231f1a;
+
+            --danger:#ff7a70;
+            --success:#6fd08c;
+            --shadow:0 14px 40px rgba(0,0,0,0.45);
+        }
+
         *{box-sizing:border-box;margin:0;padding:0;}
         html,body{height:100%;}
         body{
@@ -69,6 +84,21 @@
             transition:color 0.15s;
         }
         .nav-link:hover{color:var(--color-text-primary);}
+
+        .nav-actions{display:flex;align-items:center;gap:14px;}
+        .icon-btn{
+            height:32px;width:32px;
+            display:inline-flex;align-items:center;justify-content:center;
+            border:0.5px solid var(--color-border-secondary);
+            background:rgba(255,255,255,0.35);
+            border-radius:4px;
+            cursor:pointer;
+            transition:background 0.15s,border-color 0.15s,transform 0.08s;
+        }
+        html[data-theme="dark"] .icon-btn{background:rgba(255,255,255,0.06);}
+        .icon-btn:hover{border-color:var(--color-border-primary);}
+        .icon-btn:active{transform:translateY(1px);}
+        .icon-btn svg{width:16px;height:16px;stroke:var(--color-text-secondary);}
 
         .content{
             flex:1;
@@ -195,6 +225,18 @@
         .msg.error{border-color:rgba(179,54,46,0.35);color:var(--danger);background:rgba(179,54,46,0.06);}
         .msg.ok{border-color:rgba(43,107,59,0.35);color:var(--success);background:rgba(43,107,59,0.06);}
 
+        .helper{
+            margin-top:14px;
+            font-size:12px;
+            color:var(--color-text-tertiary);
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+        .helper a{color:var(--color-text-secondary);text-decoration:none;border-bottom:1px solid transparent;}
+        .helper a:hover{border-bottom-color:currentColor;color:var(--color-text-primary);}
+
         .foot{
             padding:16px 32px;
             border-top:0.5px solid var(--color-border-tertiary);
@@ -225,7 +267,22 @@
 <div class="shell">
     <header class="nav">
         <a class="nav-logo" href="/" aria-label="Tortilla Cloud home">Taco<span>/</span>Cloud</a>
-        <a class="nav-link" href="/">Back to home</a>
+        <div class="nav-actions">
+            <button class="icon-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v2"></path>
+                    <path d="M12 19v2"></path>
+                    <path d="M4.22 4.22l1.42 1.42"></path>
+                    <path d="M18.36 18.36l1.42 1.42"></path>
+                    <path d="M3 12h2"></path>
+                    <path d="M19 12h2"></path>
+                    <path d="M4.22 19.78l1.42-1.42"></path>
+                    <path d="M18.36 5.64l1.42-1.42"></path>
+                    <circle cx="12" cy="12" r="4"></circle>
+                </svg>
+            </button>
+            <a class="nav-link" href="/">Back to home</a>
+        </div>
     </header>
 
     <main class="content">
@@ -276,6 +333,11 @@
                         <div class="msg ok" th:if="${param.logout}">
                             You have been logged out.
                         </div>
+
+                        <div class="helper" aria-label="Account helpers">
+                            <span>New here?</span>
+                            <a th:href="@{/register}">Create an account</a>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -289,6 +351,25 @@
 </div>
 
 <script>
+    (function initTheme(){
+        const root = document.documentElement;
+        const key = 'tc_theme';
+        const stored = localStorage.getItem(key);
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initial = stored || (prefersDark ? 'dark' : 'light');
+        if (initial === 'dark') root.dataset.theme = 'dark';
+
+        const btn = document.getElementById('themeToggle');
+        if (btn){
+            btn.addEventListener('click', () => {
+                const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+                if (next === 'dark') root.dataset.theme = 'dark';
+                else delete root.dataset.theme;
+                localStorage.setItem(key, next);
+            });
+        }
+    })();
+
     // Make keyboard flow feel crisp.
     window.addEventListener('load', () => {
         const u = document.getElementById('username');
