@@ -21,7 +21,7 @@ public class OrdersCurrentController {
         return "orderForm";
     }
 
-    @PostMapping
+    @PostMapping("/current")
     public String orderSubmission(@Valid Order order , Errors errors){
         if (errors.hasErrors()) {
             return "orderForm";
