@@ -53,6 +53,12 @@
                     radial-gradient(900px 520px at 85% 70%, rgba(255,255,255,0.55), rgba(255,255,255,0) 62%),
                     linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 55%);
         }
+        html[data-theme="dark"] .bg{
+            background:
+                    radial-gradient(900px 520px at 15% 25%, rgba(255,255,255,0.07), rgba(255,255,255,0) 60%),
+                    radial-gradient(900px 520px at 85% 70%, rgba(255,255,255,0.05), rgba(255,255,255,0) 62%),
+                    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0) 55%);
+        }
         .bg:after{
             content:"";
             position:absolute;inset:0;
@@ -62,6 +68,7 @@
             background-size:18px 18px;
             mix-blend-mode:multiply;
         }
+        html[data-theme="dark"] .bg:after{opacity:0.08;mix-blend-mode:normal;}
 
         .shell{min-height:100%;display:flex;flex-direction:column;}
 
@@ -71,13 +78,14 @@
             background:rgba(250,247,242,0.55);
             backdrop-filter: blur(10px);
         }
+        html[data-theme="dark"] .nav{background:rgba(15,15,16,0.55);}
         .nav-logo{
             font-family:'Cormorant Garamond',serif;
             font-size:20px;font-weight:600;letter-spacing:0.04em;
             color:var(--color-text-primary);
             text-decoration:none;
         }
-        .nav-logo span{color:#1a1a1a;opacity:0.35;}
+        .nav-logo span{opacity:0.35;}
         .nav-link{
             font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;
             color:var(--color-text-secondary);text-decoration:none;
@@ -266,7 +274,7 @@
 
 <div class="shell">
     <header class="nav">
-        <a class="nav-logo" href="/" aria-label="Tortilla Cloud home">Taco<span>/</span>Cloud</a>
+        <a class="nav-logo" href="/" aria-label="Tortilla Cloud home">Tortilla<span>/</span>Cloud</a>
         <div class="nav-actions">
             <button class="icon-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle theme">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -344,10 +352,6 @@
         </section>
     </main>
 
-    <footer class="foot">
-        <span>Tip: Spring Security may print a generated dev password in the console when no users are configured.</span>
-        <a href="/design">Go to designer</a>
-    </footer>
 </div>
 
 <script>
