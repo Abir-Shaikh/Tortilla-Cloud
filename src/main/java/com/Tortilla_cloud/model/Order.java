@@ -16,6 +16,9 @@ import java.util.List;
 @Table(name = "Tortilla_Order")
 public class Order {
 
+    @ManyToOne
+    private User user;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
