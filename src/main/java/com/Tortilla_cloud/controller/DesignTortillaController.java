@@ -3,6 +3,8 @@ package com.Tortilla_cloud.controller;
 import com.Tortilla_cloud.model.Ingredient;
 import com.Tortilla_cloud.model.Tortilla;
 import com.Tortilla_cloud.model.Type;
+import com.Tortilla_cloud.repository.IngredientRepository;
+import com.Tortilla_cloud.repository.TortillaRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -20,27 +22,14 @@ import java.util.List;
 @Controller
 @RequestMapping("/design")
 public class DesignTortillaController {
-    private static final List<Ingredient> INGREDIENTS = Arrays.asList(
-            new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
-            new Ingredient("COTO", "Corn Tortilla", Type.WRAP),
-            new Ingredient("WHTO", "Whole Wheat Tortilla", Type.WRAP),
 
-            new Ingredient("SMCH", "Smoked Chicken", Type.PROTEIN),
-            new Ingredient("CARN", "Carnitas", Type.PROTEIN),
-            new Ingredient("SLST", "Sliced Steak", Type.PROTEIN),
+    private final IngredientRepository ingredientRepository;
+    private final TortillaRepository tortillaRepository;
 
-            new Ingredient("TMTO", "Diced Tomato", Type.VEGGIES),
-            new Ingredient("LETT", "Lettuce", Type.VEGGIES),
-            new Ingredient("SWPO", "Sweet Potato", Type.VEGGIES),
-            new Ingredient("HUMM", "Hummus", Type.VEGGIES),
-
-            new Ingredient("CHED", "Cheddar", Type.CHEESE),
-            new Ingredient("JACK", "Monterrey Jack", Type.CHEESE),
-
-            new Ingredient("SLSA", "Salsa", Type.SAUCE),
-            new Ingredient("MAYO", "Mayonnaise", Type.SAUCE)
-    );
-
+    public DesignTortillaController(IngredientRepository ingredientRepository, TortillaRepository tortillaRepository) {
+        this.ingredientRepository = ingredientRepository;
+        this.tortillaRepository = tortillaRepository;
+    }
 
     @ModelAttribute("design")
     public Tortilla design() {
@@ -51,7 +40,9 @@ public class DesignTortillaController {
     @ModelAttribute
     public void addIngredientsToModel(Model model) {
         for (Type type : Type.values()) {
-            model.addAttribute(type.name().toLowerCase(), filterByType(INGREDIENTS, type));
+            model.addAttribute
+                    (type.name().toLowerCase(),
+                    ingredientRepository.findByType(type));
         }
     }
 
@@ -65,13 +56,9 @@ public class DesignTortillaController {
         if (errors.hasErrors()) {
             return "design";
         }
-        log.info("Processing design: {}", design);
+        tortillaRepository.save(design);
+        log.info("Saved tortilla: {}", design);
         return "redirect:/orders/current";
     }
 
-    private List<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
-        return ingredients.stream()
-                .filter(ingredient -> ingredient.getType() == type)
-                .toList();
-    }
 }
