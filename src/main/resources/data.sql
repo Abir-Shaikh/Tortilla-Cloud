@@ -1,0 +1,14 @@
+INSERT INTO ingredient (id, name, type) VALUES ('FLTO', 'Flour Tortilla', 'WRAP');
+INSERT INTO ingredient (id, name, type) VALUES ('COTO', 'Corn Tortilla', 'WRAP');
+INSERT INTO ingredient (id, name, type) VALUES ('WHTO', 'Whole Wheat Tortilla', 'WRAP');
+INSERT INTO ingredient (id, name, type) VALUES ('SMCH', 'Smoked Chicken', 'PROTEIN');
+INSERT INTO ingredient (id, name, type) VALUES ('CARN', 'Carnitas', 'PROTEIN');
+INSERT INTO ingredient (id, name, type) VALUES ('SLST', 'Sliced Steak', 'PROTEIN');
+INSERT INTO ingredient (id, name, type) VALUES ('TMTO', 'Diced Tomato', 'VEGGIES');
+INSERT INTO ingredient (id, name, type) VALUES ('LETT', 'Lettuce', 'VEGGIES');
+INSERT INTO ingredient (id, name, type) VALUES ('SWPO', 'Sweet Potato', 'VEGGIES');
+INSERT INTO ingredient (id, name, type) VALUES ('HUMM', 'Hummus', 'VEGGIES');
+INSERT INTO ingredient (id, name, type) VALUES ('CHED', 'Cheddar', 'CHEESE');
+INSERT INTO ingredient (id, name, type) VALUES ('JACK', 'Monterrey Jack', 'CHEESE');
+INSERT INTO ingredient (id, name, type) VALUES ('SLSA', 'Salsa', 'SAUCE');
+INSERT INTO ingredient (id, name, type) VALUES ('MAYO', 'Mayonnaise', 'SAUCE');
