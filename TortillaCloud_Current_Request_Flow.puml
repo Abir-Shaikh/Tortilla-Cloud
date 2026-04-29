@@ -24,8 +24,12 @@ participant "Spring Security\n(FilterChain)" as Security
 participant HomeController
 participant DesignTortillaController
 participant OrdersCurrentController
+participant RegistrationController
 
-participant "Sample Ingredient List" as IngredientList
+participant IngredientRepository
+participant TortillaRepository
+participant OrderRepository
+database "H2 DB" as DB
 participant "Type enum" as TypeEnum
 
 participant "Thymeleaf home.html" as home_html
@@ -33,14 +37,6 @@ participant "Thymeleaf login.html" as login_html
 participant "Thymeleaf registration.html" as registration_html
 participant "Thymeleaf design.html" as design_html
 participant "Thymeleaf orderForm.html" as orderForm_html
-
-' Future (declared up-front to match the reference layout)
-database "Database" as DB
-participant AuthController
-participant CartController
-participant CheckoutController
-participant PaymentController
-participant "Payment Gateway" as Gateway
 
 == Home Page ==
 Customer -> Browser : Open application
@@ -59,7 +55,7 @@ Form login configured:
 - On failure, redirect -> /login?error
 Logout:
 - POST /logout (CSRF protected)
-- Redirect -> /login?logout
+- Redirect -> /
 end note
 
 == Registration (Public) ==
@@ -109,8 +105,10 @@ alt Not authenticated
 end
 
 Security -> DesignTortillaController : Allowed (authenticated)
-DesignTortillaController -> IngredientList : getIngredients()
-IngredientList --> DesignTortillaController : ingredients
+DesignTortillaController -> IngredientRepository : findByType(Type.*)
+IngredientRepository -> DB : SELECT ingredients by type
+DB --> IngredientRepository : ingredients
+IngredientRepository --> DesignTortillaController : ingredients
 DesignTortillaController -> TypeEnum : read enum values
 TypeEnum --> DesignTortillaController : types
 
@@ -131,6 +129,9 @@ alt Validation errors
   DesignTortillaController -> design_html : return "design" with errors
   design_html --> Browser : Render errors
 else Valid
+  DesignTortillaController -> TortillaRepository : save(design)
+  TortillaRepository -> DB : INSERT tortilla (+ join rows)
+  DB --> TortillaRepository : saved
   DesignTortillaController --> Browser : Redirect -> /orders/current
 end
 
@@ -147,57 +148,36 @@ alt Validation errors
   OrdersCurrentController -> orderForm_html : return "orderForm" with errors
   orderForm_html --> Browser : Render errors
 else Valid
+  OrdersCurrentController -> OrderRepository : save(order + user)
+  OrderRepository -> DB : INSERT order (+ join rows)
+  DB --> OrderRepository : saved
   OrdersCurrentController --> Browser : Redirect -> /
 end
 
 == Logout ==
 Customer -> Browser : Click Logout
 Browser -> Security : POST /logout (_csrf)
-Security --> Browser : 302 Redirect -> /login?logout
-Browser -> Security : GET /login?logout
+Security --> Browser : 302 Redirect -> /
+Browser -> Security : GET /
 Security -> HomeController : Allowed (permitAll)
-HomeController -> login_html : return "login"
-login_html --> Browser : Render logout message
+HomeController -> home_html : return "home"
+home_html --> Browser : Render home page
 
 note left of Browser
 Current state:
 - Server-rendered Spring MVC app
 - Thymeleaf templates for UI
-- Ingredients are hard-coded (in-memory list)
-- JPA + H2 are configured; users are persisted (registration + login via DB)
-- Controllers still don't persist orders/designs yet
+- Ingredients are loaded from DB (seeded by data.sql)
+- Users are persisted (registration + login via DB)
+- Tortilla designs and orders are persisted via Spring Data JPA (H2 in-memory)
 - Spring Security form login is enabled with a custom /login page
 end note
 
-== Future Additions ==
-Browser -> DesignTortillaController : GET /design
-DesignTortillaController -> DB : load ingredients
-DB --> DesignTortillaController : ingredients
-DesignTortillaController -> design_html : return "design"
-
-Browser -> CartController : POST /cart
-CartController -> DB : validate item / update cart
-DB --> CartController : updated cart state
-
-Browser -> AuthController : POST /register / login
-AuthController -> DB : validate user / create session
-DB --> AuthController : user/session data
-
-Browser -> CheckoutController : POST /checkout
-CheckoutController -> DB : save order
-DB --> CheckoutController : order id / status
-CheckoutController -> PaymentController : initiate payment
-PaymentController -> Gateway : process payment
-Gateway --> PaymentController : payment status
-PaymentController --> Browser : payment result
-
 note left of Browser
 Recommended next steps:
-- Add services (IngredientService, OrderService)
-- Wire repositories + persistence (JPA)
-- Add real users (UserDetailsService + password encoding) instead of generated dev password
-- Add cart + checkout controllers
-- Integrate a payment gateway
+- Add cart + checkout flow (controllers + UI)
+- Add order history (/account/orders)
+- Integrate a payment gateway + webhooks
 end note
 
 @enduml
