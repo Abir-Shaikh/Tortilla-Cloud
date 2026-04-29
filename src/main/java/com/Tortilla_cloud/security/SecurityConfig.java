@@ -21,6 +21,7 @@ public class SecurityConfig{
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/" , "/login" , "/register").permitAll()
                         .requestMatchers("/design" , "/orders/**").authenticated()
                         .anyRequest().authenticated())
@@ -34,7 +35,13 @@ public class SecurityConfig{
                         login -> login
                                 .loginPage("/login")
                                 .defaultSuccessUrl("/design" , true)
-                                .permitAll()
+                                .permitAll())
+
+                .csrf( csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**"))
+
+                .headers(headers->headers
+                        .frameOptions(frame-> frame.disable())
                 );
         return http.build();
     }
