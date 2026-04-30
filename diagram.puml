@@ -1,12 +1,18 @@
-@startuml TortillaCloud_Architecture
-title Tortilla Cloud - Application Architecture
+@startuml TortillaCloud_Full_Architecture
+title Tortilla Cloud - Full Application Architecture
 left to right direction
 
 skinparam shadowing false
 skinparam componentStyle rectangle
 skinparam packageStyle rectangle
 
-package "Web MVC Layer" {
+actor "Browser User" as Browser
+
+package "Entry / Bootstrapping" {
+  [TortillaCloudApplication]
+}
+
+package "Web MVC Layer (Controllers)" {
   [HomeController]
   [RegistrationController]
   [DesignTortillaController]
@@ -17,48 +23,96 @@ package "Security Layer" {
   [SecurityConfig]
   [UserRepositoryUserDetailsService]
   [RegistrationForm]
-  [PasswordEncoder]
+  [PasswordEncoder (BCrypt)]
+  [Spring Security Filter Chain]
 }
 
-package "Persistence Layer" {
+package "Configuration Layer" {
+  [OrderProps]
+  [application.properties]
+}
+
+package "Service Layer" {
+  [UserDetailsService Contract]
+}
+
+package "Persistence Layer (Repositories)" {
   [UserRepository]
   [IngredientRepository]
   [TortillaRepository]
   [OrderRepository]
-  database "H2 DB" as DB
 }
 
-package "Domain Model" {
-  class User
-  class Order
-  class Tortilla
-  class Ingredient
-  enum Type
+package "Domain Model (JPA Entities)" {
+  [User Entity] as UserEntity
+  [Order Entity] as OrderEntity
+  [Tortilla Entity] as TortillaEntity
+  [Ingredient Entity] as IngredientEntity
+  [Type Enum] as TypeEnum
 }
 
-[SecurityConfig] --> [HomeController]
-[SecurityConfig] --> [RegistrationController]
-[SecurityConfig] --> [DesignTortillaController]
-[SecurityConfig] --> [OrdersCurrentController]
+package "View Layer (Thymeleaf Templates)" {
+  [home.html]
+  [login.html]
+  [registration.html]
+  [design.html]
+  [orderForm.html]
+  [orderList.html]
+}
+
+database "H2 In-Memory DB" as DB
+collections "data.sql" as SeedData
+
+Browser --> [Spring Security Filter Chain]
+[Spring Security Filter Chain] --> [HomeController]
+[Spring Security Filter Chain] --> [RegistrationController]
+[Spring Security Filter Chain] --> [DesignTortillaController]
+[Spring Security Filter Chain] --> [OrdersCurrentController]
+
+[SecurityConfig] --> [Spring Security Filter Chain]
 [SecurityConfig] --> [UserRepositoryUserDetailsService]
+[SecurityConfig] --> [PasswordEncoder (BCrypt)]
 
+[UserRepositoryUserDetailsService] ..> [UserDetailsService Contract]
 [UserRepositoryUserDetailsService] --> [UserRepository]
+
 [RegistrationController] --> [RegistrationForm]
-[RegistrationController] --> [PasswordEncoder]
+[RegistrationForm] --> [PasswordEncoder (BCrypt)]
+[RegistrationForm] --> UserEntity : creates
 [RegistrationController] --> [UserRepository]
 
 [DesignTortillaController] --> [IngredientRepository]
 [DesignTortillaController] --> [TortillaRepository]
+[DesignTortillaController] --> TypeEnum
+
 [OrdersCurrentController] --> [OrderRepository]
+[OrdersCurrentController] --> [OrderProps]
+[OrderProps] --> [application.properties]
 
-[UserRepository] --> DB
-[IngredientRepository] --> DB
-[TortillaRepository] --> DB
-[OrderRepository] --> DB
+[HomeController] --> [home.html]
+[HomeController] --> [login.html]
+[RegistrationController] --> [registration.html]
+[DesignTortillaController] --> [design.html]
+[OrdersCurrentController] --> [orderForm.html]
+[OrdersCurrentController] --> [orderList.html]
 
-User "1" <-- "0..*" Order : places
-Order "0..*" -- "0..*" Tortilla : contains
-Tortilla "1..*" -- "0..*" Ingredient : selected from
-Ingredient --> Type : typed by
+[UserRepository] --> UserEntity
+[IngredientRepository] --> IngredientEntity
+[IngredientRepository] --> TypeEnum
+[TortillaRepository] --> TortillaEntity
+[OrderRepository] --> OrderEntity
+[OrderRepository] --> UserEntity
+
+UserEntity "1" <-- "0..*" OrderEntity : places
+OrderEntity "0..*" -- "0..*" TortillaEntity : contains
+TortillaEntity "1..*" -- "0..*" IngredientEntity : selected from
+IngredientEntity --> TypeEnum : typed by
+
+UserEntity --> DB
+OrderEntity --> DB
+TortillaEntity --> DB
+IngredientEntity --> DB
+
+SeedData --> IngredientEntity
 
 @enduml
