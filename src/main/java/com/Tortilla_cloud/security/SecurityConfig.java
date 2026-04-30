@@ -24,6 +24,7 @@ public class SecurityConfig{
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/" , "/login" , "/register").permitAll()
                         .requestMatchers("/design" , "/orders/**").authenticated()
+                        .requestMatchers("/design", "/orders/**", "/orders").authenticated()
                         .anyRequest().authenticated())
 
                 .logout(logout -> logout
@@ -34,7 +35,7 @@ public class SecurityConfig{
                 .formLogin(
                         login -> login
                                 .loginPage("/login")
-                                .defaultSuccessUrl("/design" , true)
+                                .defaultSuccessUrl("/design" , false)
                                 .permitAll())
 
                 .csrf( csrf -> csrf
