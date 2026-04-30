@@ -2,182 +2,128 @@
 title Tortilla Cloud - Current Request Flow
 
 skinparam shadowing false
-skinparam backgroundColor #ffffff
 skinparam sequence {
-  ArrowColor #1f1f1f
-  LifeLineBorderColor #9a9a9a
-  LifeLineBackgroundColor #ffffff
-  ParticipantBorderColor #9a9aa8
-  ParticipantBackgroundColor #e9e9f2
-  ParticipantFontColor #111111
-  ActorBorderColor #6b6b6b
-  ActorBackgroundColor #ffffff
-  NoteBorderColor #b59b52
-  NoteBackgroundColor #fff2cc
-  DividerBorderColor #1f1f1f
-  DividerBackgroundColor #ffffff
+  ArrowColor #333333
+  LifeLineBorderColor #8a8a8a
+  ParticipantBorderColor #8a8aa0
+  ParticipantBackgroundColor #eef0f7
+  ActorBorderColor #666666
+  NoteBackgroundColor #fff6d5
+  NoteBorderColor #c8a64a
 }
 
 actor Customer
 participant Browser
-participant "Spring Security\n(FilterChain)" as Security
-participant HomeController
-participant DesignTortillaController
-participant OrdersCurrentController
-participant RegistrationController
-
-participant IngredientRepository
-participant TortillaRepository
-participant OrderRepository
+participant "Spring Security\nFilterChain" as Security
+participant HomeController as Home
+participant RegistrationController as Register
+participant DesignTortillaController as Design
+participant OrdersCurrentController as Orders
+participant PasswordEncoder as Encoder
+participant UserRepository as UserRepo
+participant IngredientRepository as IngredientRepo
+participant TortillaRepository as TortillaRepo
+participant OrderRepository as OrderRepo
 database "H2 DB" as DB
-participant "Type enum" as TypeEnum
 
-participant "Thymeleaf home.html" as home_html
-participant "Thymeleaf login.html" as login_html
-participant "Thymeleaf registration.html" as registration_html
-participant "Thymeleaf design.html" as design_html
-participant "Thymeleaf orderForm.html" as orderForm_html
-
-== Home Page ==
-Customer -> Browser : Open application
+== Landing ==
+Customer -> Browser : Open app
 Browser -> Security : GET /
-Security -> HomeController : Allowed (permitAll)
-HomeController -> home_html : return "home"
-home_html --> Browser : Render homepage
-Browser --> Customer : Show landing page
+Security -> Home : permitAll
+Home --> Browser : "home"
+Browser --> Customer : Render home page
 
-== Login (Security) ==
-note right of Security
-Form login configured:
-- GET /login renders a custom template
-- POST /login handled by Spring Security
-- On success, redirect -> /design
-- On failure, redirect -> /login?error
-Logout:
-- POST /logout (CSRF protected)
-- Redirect -> /
-end note
-
-== Registration (Public) ==
+== Registration ==
 Customer -> Browser : Open /register
 Browser -> Security : GET /register
-Security -> RegistrationController : Allowed (permitAll)
-RegistrationController -> registration_html : return "registration"
-registration_html --> Browser : Render sign up page
-Browser --> Customer : Show sign up form
+Security -> Register : permitAll
+Register --> Browser : "registration"
 
-Customer -> Browser : Submit sign up
-Browser -> Security : POST /register (form fields, _csrf)
-Security -> RegistrationController : Allowed (permitAll)
-alt Missing or invalid password/fields
-  RegistrationController --> Browser : 500/400 (binding/validation error)
-else Valid
-  RegistrationController --> Browser : 302 Redirect -> /login
-  Browser -> Security : GET /login
-  Security -> HomeController : Allowed (permitAll)
-  HomeController -> login_html : return "login"
-  login_html --> Browser : Render login page
+Customer -> Browser : Submit registration form
+Browser -> Security : POST /register
+Security -> Register : permitAll
+Register -> Encoder : encode(password)
+Encoder --> Register : encoded password
+Register -> UserRepo : save(user)
+UserRepo -> DB : INSERT tortilla_user
+DB --> UserRepo : persisted user
+Register --> Browser : 302 -> /login
+
+== Login and redirect ==
+Customer -> Browser : Submit /login credentials
+Browser -> Security : POST /login
+alt Invalid credentials
+  Security --> Browser : 302 -> /login?error
+else Valid credentials
+  Security --> Browser : 302 -> /design
 end
 
-== Design Page ==
-Customer -> Browser : Open /design
+== Design ==
 Browser -> Security : GET /design
 alt Not authenticated
-  Security --> Browser : 302 Redirect -> /login
-  Browser -> Security : GET /login
-  Security -> HomeController : Allowed (permitAll)
-  HomeController -> login_html : return "login"
-  login_html --> Browser : Render login page
-  Browser --> Customer : Show login form
-
-  Customer -> Browser : Submit credentials
-  Browser -> Security : POST /login (username, password, _csrf)
-  alt Invalid credentials
-    Security --> Browser : 302 Redirect -> /login?error
-    Browser -> Security : GET /login?error
-    Security -> HomeController : Allowed (permitAll)
-    HomeController -> login_html : return "login"
-    login_html --> Browser : Render error message
-  else Valid credentials
-    Security --> Browser : 302 Redirect -> /design
-    Browser -> Security : GET /design
+  Security --> Browser : 302 -> /login
+else Authenticated
+  Security -> Design : allowed
+  loop for each Type enum value
+    Design -> IngredientRepo : findByType(type)
+    IngredientRepo -> DB : SELECT ingredient by type
+    DB --> IngredientRepo : ingredient list
+    IngredientRepo --> Design : ingredient list
   end
+  Design --> Browser : "design"
 end
 
-Security -> DesignTortillaController : Allowed (authenticated)
-DesignTortillaController -> IngredientRepository : findByType(Type.*)
-IngredientRepository -> DB : SELECT ingredients by type
-DB --> IngredientRepository : ingredients
-IngredientRepository --> DesignTortillaController : ingredients
-DesignTortillaController -> TypeEnum : read enum values
-TypeEnum --> DesignTortillaController : types
-
-note right of DesignTortillaController
-Adds model attributes:
-- wrap / protein / veggies / cheese / sauce (lists)
-- design (form backing)
-end note
-
-DesignTortillaController -> design_html : return "design" with model
-design_html --> Browser : Render design page
-Browser --> Customer : Show design page
-
-Customer -> Browser : Submit tortilla design
-Browser -> Security : POST /design (Tortilla, _csrf)
-Security -> DesignTortillaController : Allowed (authenticated)
+Customer -> Browser : POST /design (tortilla)
+Browser -> Security : POST /design
+Security -> Design : allowed
 alt Validation errors
-  DesignTortillaController -> design_html : return "design" with errors
-  design_html --> Browser : Render errors
-else Valid
-  DesignTortillaController -> TortillaRepository : save(design)
-  TortillaRepository -> DB : INSERT tortilla (+ join rows)
-  DB --> TortillaRepository : saved
-  DesignTortillaController --> Browser : Redirect -> /orders/current
+  Design --> Browser : "design" with errors
+else Valid tortilla
+  Design -> TortillaRepo : save(tortilla)
+  TortillaRepo -> DB : INSERT tortilla + joins
+  DB --> TortillaRepo : persisted tortilla
+  Design --> Browser : 302 -> /orders/current
 end
 
-== Order Page ==
+== Orders ==
 Browser -> Security : GET /orders/current
-Security -> OrdersCurrentController : Allowed (authenticated)
-OrdersCurrentController -> orderForm_html : return "orderForm"
-orderForm_html --> Browser : Render order form
+Security -> Orders : allowed
+Orders --> Browser : "orderForm"
 
-Customer -> Browser : Submit order
-Browser -> Security : POST /orders/current (Order, _csrf)
-Security -> OrdersCurrentController : Allowed (authenticated)
+Customer -> Browser : POST /orders/current
+Browser -> Security : POST /orders/current
+Security -> Orders : allowed
 alt Validation errors
-  OrdersCurrentController -> orderForm_html : return "orderForm" with errors
-  orderForm_html --> Browser : Render errors
-else Valid
-  OrdersCurrentController -> OrderRepository : save(order + user)
-  OrderRepository -> DB : INSERT order (+ join rows)
-  DB --> OrderRepository : saved
-  OrdersCurrentController --> Browser : Redirect -> /
+  Orders --> Browser : "orderForm" with errors
+else Valid order
+  Orders -> OrderRepo : save(order with user)
+  OrderRepo -> DB : INSERT tortilla_order + joins
+  DB --> OrderRepo : persisted order
+  Orders --> Browser : 302 -> /
 end
+
+== Order history ==
+Customer -> Browser : Open /orders
+Browser -> Security : GET /orders
+Security -> Orders : allowed
+Orders -> OrderRepo : findByUser(user, pageable)
+OrderRepo -> DB : SELECT recent orders
+DB --> OrderRepo : orders
+Orders --> Browser : "orderList"
 
 == Logout ==
-Customer -> Browser : Click Logout
-Browser -> Security : POST /logout (_csrf)
-Security --> Browser : 302 Redirect -> /
-Browser -> Security : GET /
-Security -> HomeController : Allowed (permitAll)
-HomeController -> home_html : return "home"
-home_html --> Browser : Render home page
+Customer -> Browser : Click logout
+Browser -> Security : POST /logout
+Security --> Browser : 302 -> /
 
-note left of Browser
-Current state:
-- Server-rendered Spring MVC app
-- Thymeleaf templates for UI
-- Ingredients are loaded from DB (seeded by data.sql)
-- Users are persisted (registration + login via DB)
-- Tortilla designs and orders are persisted via Spring Data JPA (H2 in-memory)
-- Spring Security form login is enabled with a custom /login page
-end note
-
-note left of Browser
-Recommended next steps:
-- Add cart + checkout flow (controllers + UI)
-- Add order history (/account/orders)
-- Integrate a payment gateway + webhooks
+note over Security
+Protected paths:
+- /design
+- /orders/**
+Public paths:
+- /
+- /login
+- /register
 end note
 
 @enduml
