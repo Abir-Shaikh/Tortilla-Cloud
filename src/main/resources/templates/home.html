@@ -39,12 +39,26 @@
     .pg{font-family:'Instrument Sans',sans-serif;background:var(--color-background-primary);color:var(--color-text-primary);}
 
     .nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:0.5px solid var(--color-border-tertiary);}
-    .nav-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:0.04em;color:var(--color-text-primary);}
+    .nav-logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:0.04em;color:var(--color-text-primary);text-decoration:none;}
     .nav-logo span{opacity:0.35;}
     .nav-link{font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-secondary);text-decoration:none;transition:color 0.15s;}
     .nav-link:hover{color:var(--color-text-primary);}
     .nav-cta{font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-primary);background:transparent;border:0.5px solid var(--color-border-primary);padding:8px 18px;border-radius:2px;cursor:pointer;text-decoration:none;transition:background 0.15s;}
     .nav-cta:hover{background:var(--color-background-secondary);}
+    .nav-link-btn{
+        font-size:12px;
+        font-weight:500;
+        letter-spacing:0.08em;
+        text-transform:uppercase;
+        color:var(--color-text-secondary);
+        background:transparent;
+        border:none;
+        padding:0;
+        cursor:pointer;
+        transition:color 0.15s;
+        font-family:inherit;
+    }
+    .nav-link-btn:hover{color:var(--color-text-primary);}
 
     .nav-actions{display:flex;align-items:center;gap:12px;}
     .icon-btn{
@@ -105,6 +119,89 @@
     .bb-right{padding:36px 32px;display:flex;align-items:center;justify-content:flex-end;}
     .bb-heading{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--color-text-primary);margin-bottom:8px;}
     .bb-sub{font-size:12px;color:var(--color-text-secondary);line-height:1.7;}
+
+    .orders-section{
+        display:grid;
+        grid-template-columns:1fr auto;
+        align-items:center;
+        gap:24px;
+        padding:32px;
+        border-top:0.5px solid var(--color-border-tertiary);
+        border-bottom:0.5px solid var(--color-border-tertiary);
+        background:var(--color-background-secondary);
+    }
+    .orders-title{
+        font-family:'Cormorant Garamond',serif;
+        font-size:1.8rem;
+        font-weight:600;
+        color:var(--color-text-primary);
+        margin-bottom:6px;
+    }
+    .orders-sub{
+        font-size:12px;
+        color:var(--color-text-secondary);
+        line-height:1.7;
+        max-width:460px;
+    }
+
+    .about-section{
+        display:grid;
+        grid-template-columns:1.05fr 0.95fr;
+        border-top:0.5px solid var(--color-border-tertiary);
+        border-bottom:0.5px solid var(--color-border-tertiary);
+        background:var(--color-background-primary);
+    }
+    .about-left{
+        padding:38px 32px;
+        border-right:0.5px solid var(--color-border-tertiary);
+    }
+    .about-eyebrow{
+        font-size:10px;
+        font-weight:500;
+        letter-spacing:0.14em;
+        text-transform:uppercase;
+        color:var(--color-text-tertiary);
+        margin-bottom:14px;
+    }
+    .about-title{
+        font-family:'Cormorant Garamond',serif;
+        font-size:2rem;
+        font-weight:600;
+        line-height:1.1;
+        color:var(--color-text-primary);
+        margin-bottom:14px;
+    }
+    .about-text{
+        font-size:13px;
+        line-height:1.9;
+        color:var(--color-text-secondary);
+        max-width:560px;
+    }
+    .about-right{
+        padding:38px 32px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:12px;
+        background:var(--color-background-secondary);
+    }
+    .about-point{
+        border:0.5px solid var(--color-border-secondary);
+        padding:12px 14px;
+        border-radius:2px;
+    }
+    .about-point-title{
+        font-size:10px;
+        letter-spacing:0.12em;
+        text-transform:uppercase;
+        color:var(--color-text-tertiary);
+        margin-bottom:5px;
+    }
+    .about-point-text{
+        font-size:12px;
+        color:var(--color-text-secondary);
+        line-height:1.7;
+    }
 
     .skel-grid{display:grid;grid-template-columns:repeat(4,1fr);border-left:0.5px solid var(--color-border-tertiary);}
     .skel-card{padding:20px;border-right:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;gap:10px;}
@@ -238,7 +335,7 @@
 
     <div id="main" style="display:none;">
         <div class="nav">
-            <div class="nav-logo">Tortilla<span>/</span>Cloud</div>
+            <a href="/" class="nav-logo">Tortilla<span>/</span>Cloud</a>
             <div class="nav-actions">
                 <button class="icon-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle theme">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -254,12 +351,13 @@
                     </svg>
                 </button>
                 <a href="#" class="nav-link">Menu</a>
-                <a href="#" class="nav-link">About</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="/orders" class="nav-link">Orders</a>
                 <a sec:authorize="isAnonymous()" href="/login" class="nav-link">Sign in</a>
                 <a href="/design" class="nav-cta">Design your tortilla</a>
                 <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" style="display:inline;">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" class="nav-cta">Logout</button>
+                    <button type="submit" class="nav-link-btn" aria-label="Logout" title="Logout">Logout</button>
                 </form>
             </div>
         </div>
@@ -310,6 +408,41 @@
         </div>
 
         <div class="menu-grid" id="menu-grid"></div>
+
+        <div class="orders-section">
+            <div>
+                <div class="orders-title">Your Orders</div>
+                <p class="orders-sub">Track your recent tortilla orders and revisit your favorites anytime.</p>
+            </div>
+            <a href="/orders" class="btn-primary">Go to My Orders</a>
+        </div>
+
+        <div class="about-section" id="about">
+            <div class="about-left">
+                <div class="about-eyebrow">About Tortilla Cloud</div>
+                <h2 class="about-title">A modern tortilla house built on tradition.</h2>
+                <p class="about-text">
+                    Tortilla Cloud started with one idea: everyday food should still feel crafted.
+                    We combine classic small-batch methods with bold seasonal flavors, so each tortilla
+                    is soft, fresh, and made to carry something memorable. From first click to first bite,
+                    our brand is about comfort, quality, and creativity.
+                </p>
+            </div>
+            <div class="about-right">
+                <div class="about-point">
+                    <div class="about-point-title">Fresh-first kitchen</div>
+                    <p class="about-point-text">Pressed daily in small batches to keep texture and flavor at their best.</p>
+                </div>
+                <div class="about-point">
+                    <div class="about-point-title">Flavor with intention</div>
+                    <p class="about-point-text">A curated menu balancing familiar classics with adventurous new combinations.</p>
+                </div>
+                <div class="about-point">
+                    <div class="about-point-title">Built around people</div>
+                    <p class="about-point-text">Designed for quick customization, transparent ingredients, and easy reordering.</p>
+                </div>
+            </div>
+        </div>
 
         <div class="bottom-bar">
             <div class="bb-left">
@@ -373,7 +506,7 @@
         const filtered=filter==='all'?items:filter==='chef'?items.filter(i=>i.chef):items.filter(i=>i.tag===filter);
         label.textContent=`Showing ${filtered.length}`;
         grid.innerHTML=filtered.map(i=>`
-    <div class="menu-item${i.chef?' chef':''}" onclick="window.location.href='/design'">
+    <div class="menu-item${i.chef?' chef':''}" onclick="window.location.href='/orders/current'">
       ${i.chef?'<div class="chef-dot"></div>':''}
       <div class="item-tag ${i.tag}">${i.tagLabel}</div>
       <div class="item-name">${i.name}</div>

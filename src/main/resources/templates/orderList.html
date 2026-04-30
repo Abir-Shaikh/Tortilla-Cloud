@@ -1,10 +1,183 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Your Orders — Tortilla Cloud</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg: #faf7f2; --surface: #ffffff; --dark: #1a1208;
+            --ink: #2d2416; --muted: #9c8f7a; --border: #e8e0d0;
+            --accent: #d4501a;
+        }
+        [data-theme="dark"] {
+            --bg: #111009; --surface: #1c1a14; --dark: #f0ece3;
+            --ink: #ddd5c4; --muted: #6e6452; --border: #2e2a20;
+            --accent: #e8622a;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg); color: var(--ink); font-family: 'Crimson Pro', serif; font-weight: 300; min-height: 100vh;
+            transition: background .35s, color .35s;
+        }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .85rem 3rem; background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            transition: background .35s, border-color .35s;
+        }
+        .logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .12em; color: var(--dark); }
+        .logo span { color: var(--accent); }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .theme-btn {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 50px; width: 52px; height: 28px;
+            cursor: pointer; position: relative;
+            transition: background .3s, border-color .3s;
+        }
+        .theme-btn::after {
+            content: ''; position: absolute; left: 4px; top: 4px;
+            width: 18px; height: 18px; border-radius: 50%; background: var(--accent);
+            transition: transform .3s;
+        }
+        [data-theme="dark"] .theme-btn::after { transform: translateX(24px); }
+        .theme-icon { position: absolute; font-size: .65rem; top: 50%; transform: translateY(-50%); pointer-events: none; transition: opacity .3s; }
+        .icon-sun { right: 7px; opacity: 1; }
+        .icon-moon { left: 7px; opacity: 0; }
+        [data-theme="dark"] .icon-sun { opacity: 0; }
+        [data-theme="dark"] .icon-moon { opacity: 1; }
+
+        .page { padding: 3rem; max-width: 900px; margin: 0 auto; }
+
+        .page-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            line-height: .95; letter-spacing: .02em;
+            color: var(--dark); margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+        }
+        .page-title em { font-style: italic; font-family: 'Crimson Pro', serif; color: var(--accent); }
+
+        .empty {
+            text-align: center; padding: 4rem 2rem;
+            color: var(--muted); font-style: italic; font-size: 1.1rem;
+            border: 1px dashed var(--border); border-radius: 4px;
+        }
+
+        .order-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 4px; margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .order-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+        .order-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .65rem; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--muted);
+        }
+        .order-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .65rem; color: var(--muted);
+        }
+        .order-body { padding: 1.2rem 1.5rem; }
+        .order-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem; letter-spacing: .06em;
+            color: var(--dark); margin-bottom: .5rem;
+        }
+        .order-detail {
+            font-size: .9rem; color: var(--muted);
+            line-height: 1.7;
+        }
+        .order-tortillas {
+            margin-top: .8rem; display: flex; flex-wrap: wrap; gap: .4rem;
+        }
+        .tortilla-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+            padding: .3rem .6rem; border: 1px solid var(--border);
+            border-radius: 2px; color: var(--ink);
+            background: var(--bg);
+        }
+
+        .btn {
+            display: inline-block;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: .9rem; letter-spacing: .1em;
+            padding: .7rem 1.8rem; margin-top: 2rem;
+            background: var(--dark); color: var(--bg);
+            text-decoration: none; border-radius: 2px;
+            transition: background .2s;
+        }
+        .btn:hover { background: var(--accent); }
+    </style>
 </head>
 <body>
-$END$
+
+<nav class="topbar">
+    <div class="logo">Tortilla<span>Cloud</span></div>
+    <div class="nav-right">
+        <a href="/design" style="font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;">
+            + New Tortilla
+        </a>
+        <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
+            <span class="theme-icon icon-sun">☀</span>
+            <span class="theme-icon icon-moon">☽</span>
+        </button>
+    </div>
+</nav>
+
+<div class="page">
+    <h1 class="page-title">Your<br><em>Orders</em></h1>
+
+    <!-- Empty state -->
+    <div class="empty" th:if="${#lists.isEmpty(orders)}">
+        You haven't placed any orders yet.
+    </div>
+
+    <!-- Order cards -->
+    <div th:each="order : ${orders}" class="order-card">
+        <div class="order-head">
+            <span class="order-id">Order #<span th:text="${order.id}"></span></span>
+            <span class="order-date" th:text="${#dates.format(order.placedAt, 'MMM dd, yyyy')}"></span>
+        </div>
+        <div class="order-body">
+            <div class="order-name" th:text="${order.name}"></div>
+            <div class="order-detail">
+                <span th:text="${order.street}"></span>,
+                <span th:text="${order.city}"></span>,
+                <span th:text="${order.state}"></span>
+                <span th:text="${order.zip}"></span>
+            </div>
+            <div class="order-tortillas">
+                <span class="tortilla-tag"
+                      th:each="tortilla : ${order.tortillas}"
+                      th:text="${tortilla.name}">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <a href="/design" class="btn">Design Another →</a>
+</div>
+
+<script>
+    const html  = document.documentElement;
+    const btn   = document.getElementById('themeBtn');
+    const saved = localStorage.getItem('tc-theme');
+    if (saved) html.setAttribute('data-theme', saved);
+    btn.addEventListener('click', () => {
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('tc-theme', next);
+    });
+</script>
+
 </body>
 </html>
