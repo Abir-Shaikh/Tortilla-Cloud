@@ -156,18 +156,58 @@
     .filter-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);}
     .filter-btn:hover{color:var(--color-text-secondary);}
 
-    .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0;border-left:0.5px solid var(--color-border-tertiary);}
-    .menu-item{padding:20px 20px 18px;border-right:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:background 0.12s;position:relative;}
-    .menu-item:hover{background:var(--color-background-secondary);}
+    .menu-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+        gap:16px;
+        padding:22px 32px 30px;
+    }
+    .menu-item{
+        padding:18px 18px 16px;
+        border:0.5px solid var(--color-border-tertiary);
+        border-radius:6px;
+        cursor:pointer;
+        transition:background 0.12s, border-color 0.18s;
+        position:relative;
+        transform-style:preserve-3d;
+        background:var(--color-background-secondary);
+    }
+    html[data-theme="dark"] .menu-item{background:rgba(255,255,255,0.02);}
+    .menu-item:hover{background:var(--color-background-secondary);border-color:var(--color-border-primary);}
     .menu-item.chef{background:var(--color-background-secondary);}
-    .item-tag{font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:10px;}
+    .item-img{
+        width:100%;
+        height:196px;
+        object-fit:cover;
+        display:block;
+        border:0.5px solid var(--color-border-tertiary);
+        border-radius:6px;
+        margin:0 0 12px 0;
+        background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0));
+        filter:saturate(1.02) contrast(1.02);
+        transform:translateZ(0);
+        transition:transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease, filter 240ms ease;
+        box-shadow:0 0 0 rgba(0,0,0,0);
+    }
+    html[data-theme="dark"] .item-img{filter:saturate(1.02) contrast(1.03) brightness(0.92);}
+    .menu-item:hover .item-img{
+        transform:translateY(-2px) scale(1.03);
+        border-color:var(--color-border-primary);
+        box-shadow:0 16px 40px rgba(0,0,0,0.12);
+        filter:saturate(1.05) contrast(1.03);
+    }
+    html[data-theme="dark"] .menu-item:hover .item-img{
+        box-shadow:0 18px 44px rgba(0,0,0,0.32);
+        filter:saturate(1.05) contrast(1.05) brightness(0.93);
+    }
+    .item-tag{font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:10px;}
     .item-tag.spicy{color:#993C1D;}
     .item-tag.vegan{color:#3B6D11;}
     .item-tag.new{color:#185FA5;}
     .item-tag.gf{color:#534AB7;}
-    .item-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--color-text-primary);margin-bottom:5px;line-height:1.2;}
-    .item-desc{font-size:11px;color:var(--color-text-tertiary);line-height:1.6;font-weight:400;}
-    .chef-dot{width:5px;height:5px;border-radius:50%;background:var(--color-text-primary);position:absolute;top:20px;right:20px;}
+    .item-name{font-family:'Cormorant Garamond',serif;font-size:1.18rem;font-weight:600;color:var(--color-text-primary);margin-bottom:6px;line-height:1.2;}
+    .item-desc{font-size:12px;color:var(--color-text-tertiary);line-height:1.65;font-weight:400;}
+    .chef-dot{width:6px;height:6px;border-radius:50%;background:var(--color-text-primary);position:absolute;top:16px;right:16px;}
 
     .bottom-bar{display:grid;grid-template-columns:1fr 1fr;border-top:0.5px solid var(--color-border-tertiary);}
     .bb-left{padding:36px 32px;border-right:0.5px solid var(--color-border-tertiary);}
@@ -577,6 +617,16 @@
     const heroImages = Array.from(new Set(Object.values(imageByName)));
     let heroTimer = null;
 
+    const noMenuGridImage = new Set([
+        "Gluten-free blend",
+        "Blue corn",
+        "Pumpkin & sage",
+        "Lemon & pepper",
+        "Hibiscus",
+        "Extra-virgin olive",
+        "Dark cacao",
+    ]);
+
     function renderHeroCarousel(){
         const host = document.getElementById('heroCarousel');
         const dots = document.getElementById('heroDots');
@@ -630,6 +680,7 @@
         grid.innerHTML=filtered.map(i=>`
     <div class="menu-item${i.chef?' chef':''}" onclick="window.location.href='/orders/current'">
       ${i.chef?'<div class="chef-dot"></div>':''}
+      ${(!noMenuGridImage.has(i.name) && imageByName[i.name]) ? `<img class="item-img" src="${imageByName[i.name]}" alt="${i.name}">` : ``}
       <div class="item-tag ${i.tag}">${i.tagLabel}</div>
       <div class="item-name">${i.name}</div>
       <div class="item-desc">${i.desc}</div>
