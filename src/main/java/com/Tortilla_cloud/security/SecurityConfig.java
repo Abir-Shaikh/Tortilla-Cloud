@@ -21,7 +21,11 @@ public class SecurityConfig{
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(auth -> auth
+                        // Static assets used on the public home page.
+                        .requestMatchers("/images/**", "/menu/**", "/buttons/**", "/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/tortillas/" , "/api/ingredients").permitAll()
+                        .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/" , "/login" , "/register").permitAll()
                         .requestMatchers("/design" , "/orders/**").authenticated()
                         .requestMatchers("/design", "/orders/**", "/orders").authenticated()
