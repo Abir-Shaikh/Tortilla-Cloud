@@ -89,8 +89,63 @@
     .hero-stat{display:flex;flex-direction:column;gap:4px;}
     .hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--color-text-primary);line-height:1;}
     .hero-stat-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-tertiary);}
-    .hero-img-placeholder{flex:1;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--color-border-tertiary);border-radius:2px;margin-bottom:28px;min-height:200px;background:var(--color-background-primary);}
-    .hero-img-text{font-family:'Cormorant Garamond',serif;font-size:3.5rem;opacity:0.06;user-select:none;}
+    .hero-img-placeholder{
+        flex:1;
+        border:0.5px solid var(--color-border-tertiary);
+        border-radius:2px;
+        margin-bottom:28px;
+        min-height:200px;
+        background:var(--color-background-primary);
+        position:relative;
+        overflow:hidden;
+    }
+    .hero-carousel{
+        position:absolute;
+        inset:0;
+        background:var(--color-background-primary);
+    }
+    .hero-slide{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        opacity:0;
+        transition:opacity 520ms ease;
+        filter:saturate(1.03) contrast(1.02);
+        transform:scale(1.02);
+    }
+    html[data-theme="dark"] .hero-slide{filter:saturate(1.03) contrast(1.03) brightness(0.92);}
+    .hero-slide.active{opacity:1;}
+    .hero-scrim{
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        background:
+            radial-gradient(900px 320px at 50% 60%, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.22) 60%, rgba(0,0,0,0.35) 100%),
+            linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.32) 100%);
+        opacity:0.55;
+    }
+    html[data-theme="dark"] .hero-scrim{opacity:0.65;}
+    .hero-dots{
+        position:absolute;
+        left:0; right:0;
+        bottom:12px;
+        display:flex;
+        justify-content:center;
+        gap:6px;
+        user-select:none;
+        pointer-events:auto;
+    }
+    .hero-dot{
+        width:18px;height:2px;
+        border-radius:99px;
+        background:rgba(255,255,255,0.25);
+        border:0.5px solid rgba(255,255,255,0.18);
+        transition:width 0.18s, background 0.18s;
+        cursor:pointer;
+    }
+    .hero-dot.active{background:rgba(255,255,255,0.6);width:28px;}
 
     .section-bar{display:flex;align-items:center;justify-content:space-between;padding:24px 32px 20px;border-bottom:0.5px solid var(--color-border-tertiary);}
     .section-label{font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-text-tertiary);}
@@ -374,7 +429,9 @@
             </div>
             <div class="hero-right">
                 <div class="hero-img-placeholder">
-                    <span class="hero-img-text">TC</span>
+                    <div class="hero-carousel" id="heroCarousel" aria-label="Menu image carousel"></div>
+                    <div class="hero-scrim" aria-hidden="true"></div>
+                    <div class="hero-dots" id="heroDots" aria-hidden="true"></div>
                 </div>
                 <div class="hero-stat-row">
                     <div class="hero-stat">
@@ -394,7 +451,7 @@
         </div>
 
         <div class="section-bar" id="menu">
-            <span class="section-label">Our tortillas — 20 varieties</span>
+            <span class="section-label">Our tortillas - 20 varieties</span>
             <span class="section-label" id="filter-label">Showing all</span>
         </div>
 
@@ -491,14 +548,79 @@
         {name:"Beet & rose",desc:"Naturally crimson, earthy sweetness, striking presentation",tag:"new",tagLabel:"New",chef:false},
         {name:"Turmeric golden",desc:"Anti-inflammatory base with a warm, mellow spice character",tag:"vegan",tagLabel:"Vegan",chef:false},
         {name:"Sourdough wrap",desc:"Long-fermented levain dough with proper tang and chew",tag:"popular",tagLabel:"Popular",chef:true},
-        {name:"Gluten-free blend",desc:"Rice and tapioca flour — indistinguishable from the original",tag:"gf",tagLabel:"Gluten-free",chef:false},
+        {name:"Gluten-free blend",desc:"Rice and tapioca flour - indistinguishable from the original",tag:"gf",tagLabel:"Gluten-free",chef:false},
         {name:"Blue corn",desc:"Antioxidant-rich heirloom grain, slightly firmer texture",tag:"vegan",tagLabel:"Vegan",chef:false},
         {name:"Pumpkin & sage",desc:"Autumn spice profile with roasted seeds folded through",tag:"new",tagLabel:"New",chef:false},
         {name:"Lemon & pepper",desc:"Sharp citrus zest with cracked black pepper, bright finish",tag:"popular",tagLabel:"Popular",chef:false},
-        {name:"Hibiscus",desc:"Floral, tart, tropical — pairs with ceviche and citrus fillings",tag:"new",tagLabel:"New",chef:true},
+        {name:"Hibiscus",desc:"Floral, tart, tropical - pairs with ceviche and citrus fillings",tag:"new",tagLabel:"New",chef:true},
         {name:"Extra-virgin olive",desc:"Cold-press oil base, paper-thin, bakes up with crisp edges",tag:"vegan",tagLabel:"Vegan",chef:false},
-        {name:"Dark cacao",desc:"70% cacao folded in — designed exclusively for dessert tortillas",tag:"new",tagLabel:"New",chef:true},
+        {name:"Dark cacao",desc:"70% cacao folded in - designed exclusively for dessert tortillas",tag:"new",tagLabel:"New",chef:true},
     ];
+
+    const imageByName = {
+        "Classic flour": "/menu/classicFlour.png",
+        "Yellow corn": "/menu/yellowCorn.png",
+        "Chipotle chili": "/menu/chipotleChilli.png",
+        "Avocado & spinach": "/menu/AvacadoSpinach.png",
+        "Cheese-stuffed": "/menu/cheeseStuffed.png",
+        "Ghost pepper": "/menu/GhostPepper.png",
+        "Sweet potato": "/menu/SweetPotato.png",
+        "Herb & garlic": "/menu/herbGarlic.png",
+        "Whole wheat": "/menu/wholewheat.png",
+        "Squid ink": "/menu/squidInk.png",
+        "Beet & rose": "/menu/beetRose.png",
+        "Turmeric golden": "/menu/Turmericgolden.png",
+        "Sourdough wrap": "/menu/sourdoughTortilla.png",
+    };
+
+    // Hero carousel images: use every available menu image from /static/menu.
+    const heroImages = Array.from(new Set(Object.values(imageByName)));
+    let heroTimer = null;
+
+    function renderHeroCarousel(){
+        const host = document.getElementById('heroCarousel');
+        const dots = document.getElementById('heroDots');
+        if (!host || !dots) return;
+
+        host.innerHTML = heroImages.map((src, idx) =>
+            `<img class="hero-slide${idx===0?' active':''}" src="${src}" alt="Menu preview ${idx+1}" loading="eager">`
+        ).join('');
+        dots.innerHTML = heroImages.map((_, idx) => `<div class="hero-dot${idx===0?' active':''}" data-idx="${idx}"></div>`).join('');
+
+        const slides = Array.from(host.querySelectorAll('.hero-slide'));
+        const dotEls = Array.from(dots.querySelectorAll('.hero-dot'));
+        let index = 0;
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const setIndex = (next) => {
+            if (!slides.length) return;
+            index = (next + slides.length) % slides.length;
+            slides.forEach((s, i) => s.classList.toggle('active', i === index));
+            dotEls.forEach((d, i) => d.classList.toggle('active', i === index));
+        };
+
+        const stop = () => { if (heroTimer){ clearInterval(heroTimer); heroTimer = null; } };
+        const start = () => {
+            if (reduceMotion) return;
+            stop();
+            heroTimer = setInterval(() => setIndex(index + 1), 3800);
+        };
+
+        dotEls.forEach(d => {
+            d.onclick = () => {
+                const idx = parseInt(d.getAttribute('data-idx') || '0', 10);
+                setIndex(Number.isFinite(idx) ? idx : 0);
+            };
+        });
+
+        host.onmouseenter = () => stop();
+        host.onmouseleave = () => start();
+        host.onfocusin = () => stop();
+        host.onfocusout = () => start();
+
+        setIndex(0);
+        start();
+    }
 
     function renderGrid(filter){
         const grid=document.getElementById('menu-grid');
@@ -517,6 +639,7 @@
     setTimeout(()=>{
         document.getElementById('skel').style.display='none';
         document.getElementById('main').style.display='block';
+        renderHeroCarousel();
         renderGrid('all');
         document.querySelectorAll('.filter-btn').forEach(btn=>{
             btn.addEventListener('click',function(){
