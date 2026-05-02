@@ -8,16 +8,19 @@
 
 ## 📋 Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [API Endpoints](#api-endpoints)
-- [Database](#database)
-- [Architecture](#architecture)
-- [IDE Setup](#ide-setup)
-- [Future Roadmap](#future-roadmap)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start)
+- [Configuration](#-configuration)
+- [API Endpoints](#-api-endpoints)
+- [Database](#-database)
+- [Architecture](#-architecture)
+- [IDE Setup](#-ide-setup)
+- [Future Roadmap](#-future-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support](#-support)
 
 ---
 
