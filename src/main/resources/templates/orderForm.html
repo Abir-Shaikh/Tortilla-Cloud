@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Place Your Order — Tortilla Cloud</title>
+    <title>Place Your Order &mdash; Tortilla Cloud</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet"/>
     <style>
         :root {
@@ -253,7 +253,7 @@
 
                     <div class="field">
                         <label class="field-label" for="ccNumber">Card Number</label>
-                        <input id="ccNumber" type="text" th:field="*{ccNumber}" placeholder="•••• •••• •••• ••••"
+                        <input id="ccNumber" type="text" th:field="*{ccNumber}" placeholder="1234 5678 9012 3456"
                                th:classappend="${#fields.hasErrors('ccNumber')} ? 'field-input is-error' : 'field-input'"/>
                         <span class="field-error" th:if="${#fields.hasErrors('ccNumber')}" th:errors="*{ccNumber}"></span>
                     </div>
@@ -267,7 +267,7 @@
                         </div>
                         <div class="field">
                             <label class="field-label" for="ccCVV">CVV</label>
-                            <input id="ccCVV" type="text" th:field="*{ccCVV}" placeholder="•••"
+                            <input id="ccCVV" type="text" th:field="*{ccCVV}" placeholder="123"
                                    th:classappend="${#fields.hasErrors('ccCVV')} ? 'field-input is-error' : 'field-input'"/>
                             <span class="field-error" th:if="${#fields.hasErrors('ccCVV')}" th:errors="*{ccCVV}"></span>
                         </div>
@@ -280,7 +280,7 @@
 
         <div class="submit-row">
             <p class="submit-note">By placing your order you agree to our terms. Your card will only be charged upon confirmation.</p>
-            <button type="submit" class="btn-submit"><span>Place Order →</span></button>
+            <button type="submit" class="btn-submit"><span>Place Order &#8594;</span></button>
         </div>
 
     </form>
