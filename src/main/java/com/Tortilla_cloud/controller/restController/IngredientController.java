@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.controller;
+package com.Tortilla_cloud.controller.restController;
 
 import com.Tortilla_cloud.model.Ingredient;
 import com.Tortilla_cloud.repository.IngredientRepository;

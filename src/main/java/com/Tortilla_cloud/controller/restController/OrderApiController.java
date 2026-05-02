@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.controller;
+package com.Tortilla_cloud.controller.restController;
 
 import com.Tortilla_cloud.model.Order;
 import com.Tortilla_cloud.model.User;
@@ -13,7 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -43,20 +43,25 @@ public class OrderApiController {
 
     //get orders by id
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrdersById(@PathVariable Long id){
+    public ResponseEntity<?> getOrdersById(@PathVariable Long id){
         var order = orderRepository.findById(id);
         if (order.isPresent()){
             log.info("Fetched order with id: {}" , id);
             return ResponseEntity.ok(order.get());
         }
         log.warn("Order with id {} not found", id);
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "Order with id " + id + " not found"));
     }
 
     //post , create a new order
     @PostMapping
     public ResponseEntity<Order> saveOrder(@Valid @RequestBody Order order ,
                            @AuthenticationPrincipal User user){
+        if (user == null) {
+            log.warn("Unauthorized POST to /api/orders");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         order.setUser(user);
         log.info("Creating new order for user: {}" , user.getUsername());
         Order save = orderRepository.save(order);
