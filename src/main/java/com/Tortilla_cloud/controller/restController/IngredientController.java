@@ -27,6 +27,7 @@ public class IngredientController {
     }
 
     //get ingredient by id
+    @GetMapping("/{id}")
     public Ingredient getIngredientById(@PathVariable String id){
         log.info("Fetching ingredient with id: {}" , id);
         return ingredientRepository.findById(id).orElse(null);
