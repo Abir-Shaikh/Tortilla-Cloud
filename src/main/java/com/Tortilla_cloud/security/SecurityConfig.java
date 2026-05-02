@@ -2,12 +2,16 @@ package com.Tortilla_cloud.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Configuration
 @EnableWebSecurity
@@ -19,13 +23,26 @@ public class SecurityConfig{
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher(new AntPathRequestMatcher("/api/**"))
+                .authorizeHttpRequests(auth -> auth
+                        // Public APIs
+                        .requestMatchers("/api/tortillas", "/api/tortillas/**").permitAll()
+                        .requestMatchers("/api/ingredients", "/api/ingredients/**").permitAll()
+                        .anyRequest().authenticated())
+                .exceptionHandling(eh -> eh.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED)))
+                .httpBasic(basic -> {})
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+
+    @Bean
+    SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(auth -> auth
-                        // Static assets used on the public home page.
                         .requestMatchers("/images/**", "/menu/**", "/buttons/**", "/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/tortillas/" , "/api/ingredients").permitAll()
-                        .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/" , "/login" , "/register").permitAll()
                         .requestMatchers("/design" , "/orders/**").authenticated()
                         .requestMatchers("/design", "/orders/**", "/orders").authenticated()
