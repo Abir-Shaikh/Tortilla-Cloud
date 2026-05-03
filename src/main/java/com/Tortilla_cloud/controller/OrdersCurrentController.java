@@ -6,6 +6,7 @@ import com.Tortilla_cloud.model.User;
 import com.Tortilla_cloud.repository.OrderRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,9 +36,9 @@ public class OrdersCurrentController {
     @GetMapping
     public String OrderForUsers(Model model , @AuthenticationPrincipal User user){
         Pageable pageable = PageRequest.of(0 , orderProps.getPageSize());
-        List<Order> orders = orderRepository.findByUser(user , pageable);
+        Page<Order> orders = orderRepository.findByUser(user , pageable);
         model.addAttribute("orders" , orders);
-        log.info("Fetched {} orders for user: {}", orders.size(), user.getUsername());
+        log.info("Fetched {} orders for user: {}", orders.getTotalElements() , user.getUsername());
         return "orderList";
     }
 
