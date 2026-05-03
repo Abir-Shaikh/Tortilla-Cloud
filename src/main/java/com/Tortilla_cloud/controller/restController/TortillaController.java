@@ -4,6 +4,10 @@ import com.Tortilla_cloud.model.Tortilla;
 import com.Tortilla_cloud.repository.TortillaRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +28,17 @@ public class TortillaController {
 
     //get all tortillas
     @GetMapping
-    public Iterable<Tortilla> allTortillas(){
-        log.info("Fetching all tortillas");
-        return tortillaRepository.findAll();
+    public Page<Tortilla> allTortillas(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(defaultValue = "createdAt") String sortBy,
+                                       @RequestParam(defaultValue = "DESC") String direction){
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC")
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page , size , Sort.by(sortDirection , sortBy));
+        log.info("Fetching tortillas page {} sorted by {}" , page , sortBy);
+        return tortillaRepository.findAll(pageable);
     }
 
     // get tortillas by id

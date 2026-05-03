@@ -5,8 +5,10 @@ import com.Tortilla_cloud.model.User;
 import com.Tortilla_cloud.repository.OrderRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,15 +31,23 @@ public class OrderApiController {
 
     //get all orders
     @GetMapping
-    public ResponseEntity<List<Order>> userOrders(@AuthenticationPrincipal User user){
+    public ResponseEntity<Page<Order>> userOrders(@AuthenticationPrincipal User user ,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "10") int size,
+                                                  @RequestParam(defaultValue = "placedAt") String sortBy,
+                                                  @RequestParam(defaultValue = "DESC") String direction){
         if (user == null) {
             log.warn("Unauthorized access to /api/orders");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Pageable pageable = PageRequest.of(0,10);
-        List<Order> orders = orderRepository.findByUser(user , pageable);
-        log.info("Fetched {} orders for user: {}" , orders.size() , user.getUsername());
-        return ResponseEntity.ok(orders);
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC")
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page , size , Sort.by(sortDirection , sortBy));
+
+        Page<Order> orders = orderRepository.findByUser(user , pageable);
+        log.info("Fetched {} orders for user: {}" , page , size , user.getUsername());
+        return new ResponseEntity<>(orders , HttpStatus.OK);
     }
 
 
