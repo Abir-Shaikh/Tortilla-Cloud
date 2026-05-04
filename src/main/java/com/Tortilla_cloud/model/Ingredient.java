@@ -4,20 +4,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Data
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED , force = true)
 @Entity
 public class Ingredient {
     @Id
-    private final String id;
-    private final String name;
+    private String id;
+    private String name;
 
     @Enumerated(EnumType.STRING)
-    private final Type type;
+    private Type type;
 }
