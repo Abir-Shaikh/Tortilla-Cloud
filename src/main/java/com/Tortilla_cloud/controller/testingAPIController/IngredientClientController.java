@@ -67,18 +67,18 @@ public class IngredientClientController {
     }
 
     // TEST 6: Update ingredient using put()
-    @PutMapping("/ingredient/update/{id}")
-    public String testUpdateIngredient(@PathVariable String id) {
-        log.info("TEST: Updating ingredient {}", id);
-        Ingredient ing = ingredientServiceClient.getIngredientById(id);
-        if (ing != null) {
-            ing.setName(ing.getName() + " (UPDATED)");
-            ingredientServiceClient.updateIngredient(ing);
-            log.info("TEST: Updated successfully");
-            return "Updated: " + ing.getName();
-        }
-        return "Ingredient not found";
-    }
+//    @PutMapping("/ingredient/update/{id}")
+//    public String testUpdateIngredient(@PathVariable String id) {
+//        log.info("TEST: Updating ingredient {}", id);
+//        Ingredient ing = ingredientServiceClient.getIngredientById(id);
+//        if (ing != null) {
+//            ing.setName(ing.getName() + " (UPDATED)");
+//            ingredientServiceClient.updateIngredient(ing);
+//            log.info("TEST: Updated successfully");
+//            return "Updated: " + ing.getName();
+//        }
+//        return "Ingredient not found";
+//    }
 
     // TEST 7: Delete ingredient using delete()
     @DeleteMapping("/ingredient/delete/{id}")

@@ -7,14 +7,14 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 @Data
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED , force = true)
 @Entity
 public class Ingredient {
     @Id
-    private String id;
-    private String name;
+    private final String id;
+    private final String name;
 
     @Enumerated(EnumType.STRING)
     private Type type;
