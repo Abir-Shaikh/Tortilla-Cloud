@@ -127,3 +127,157 @@ Public paths:
 end note
 
 @enduml
+
+@startuml TortillaCloud_REST_API_Request_Flow
+title Tortilla Cloud - REST API Request Flow
+
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #333333
+  LifeLineBorderColor #8a8a8a
+  ParticipantBorderColor #8a8aa0
+  ParticipantBackgroundColor #eef0f7
+  ActorBorderColor #666666
+  NoteBackgroundColor #fff6d5
+  NoteBorderColor #c8a64a
+}
+
+actor "API Client" as Client
+participant "Spring Security\nFilterChain" as Security
+participant IngredientController as IngApi
+participant TortillaController as TortillaApi
+participant OrderApiController as OrderApi
+participant IngredientRepository as IngRepo
+participant TortillaRepository as TortillaRepo
+participant OrderRepository as OrderRepo
+database "H2 DB" as DB
+
+== Ingredients ==
+Client -> Security : GET /api/ingredients
+Security -> IngApi : permit (CORS *)
+IngApi -> IngRepo : findAll()
+IngRepo -> DB : SELECT * ingredient
+DB --> IngRepo : rows
+IngRepo --> IngApi : ingredients
+IngApi --> Client : 200 [Ingredient...]
+
+Client -> Security : GET /api/ingredients/{id}
+Security -> IngApi : permit (CORS *)
+IngApi -> IngRepo : findById(id)
+IngRepo -> DB : SELECT ingredient where id=...
+DB --> IngRepo : row/none
+IngRepo --> IngApi : Ingredient/null
+IngApi --> Client : 200 [Ingredient|null]
+
+Client -> Security : POST /api/ingredients
+Security -> IngApi : permit (CORS *)
+IngApi -> IngRepo : save(ingredient)
+IngRepo -> DB : INSERT ingredient
+DB --> IngRepo : persisted
+IngRepo --> IngApi : Ingredient
+IngApi --> Client : 201 Created
+
+== Tortillas ==
+Client -> Security : GET /api/tortillas?page&size&sortBy&direction
+Security -> TortillaApi : permit (CORS *)
+TortillaApi -> TortillaRepo : findAll(pageable)
+TortillaRepo -> DB : SELECT tortillas page
+DB --> TortillaRepo : page
+TortillaRepo --> TortillaApi : Page<Tortilla>
+TortillaApi --> Client : 200 Page<Tortilla>
+
+Client -> Security : POST /api/tortillas
+Security -> TortillaApi : permit (CORS *)
+TortillaApi -> TortillaRepo : save(tortilla)
+TortillaRepo -> DB : INSERT tortilla + join table
+DB --> TortillaRepo : persisted
+TortillaRepo --> TortillaApi : Tortilla
+TortillaApi --> Client : 201 Created
+
+== Orders (Requires AuthenticationPrincipal) ==
+Client -> Security : GET /api/orders?page&size&sortBy&direction
+alt Not authenticated
+  Security --> Client : 401 Unauthorized
+else Authenticated
+  Security -> OrderApi : allowed
+  OrderApi -> OrderRepo : findByUser(user, pageable)
+  OrderRepo -> DB : SELECT orders for user
+  DB --> OrderRepo : page
+  OrderRepo --> OrderApi : Page<Order>
+  OrderApi --> Client : 200 Page<Order>
+end
+
+Client -> Security : POST /api/orders
+alt Not authenticated
+  Security --> Client : 401 Unauthorized
+else Authenticated
+  Security -> OrderApi : allowed
+  OrderApi -> OrderRepo : save(order w/ user)
+  OrderRepo -> DB : INSERT order + join table
+  DB --> OrderRepo : persisted
+  OrderRepo --> OrderApi : Order
+  OrderApi --> Client : 201 Created
+end
+
+note over Security
+REST endpoints use CORS "*".
+Orders API checks AuthenticationPrincipal user
+and returns 401 when missing.
+end note
+
+@enduml
+
+@startuml TortillaCloud_IngredientClient_Test_Flow
+title Tortilla Cloud - IngredientServiceClient Test Flow
+
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #333333
+  LifeLineBorderColor #8a8a8a
+  ParticipantBorderColor #8a8aa0
+  ParticipantBackgroundColor #eef0f7
+  ActorBorderColor #666666
+  NoteBackgroundColor #fff6d5
+  NoteBorderColor #c8a64a
+}
+
+actor "API Client" as Client
+participant "IngredientClientController\n(/test)" as TestCtl
+participant IngredientServiceClient as ClientSvc
+participant RestTemplate as RT
+participant "IngredientController\n(/api/ingredients)" as IngApi
+participant IngredientRepository as IngRepo
+database "H2 DB" as DB
+
+== Get Ingredient By ID ==
+Client -> TestCtl : GET /test/ingredient/get/{id}
+TestCtl -> ClientSvc : getIngredientById(id)
+ClientSvc -> RT : GET http://localhost:8080/api/ingredients/{id}
+RT -> IngApi : GET /api/ingredients/{id}
+IngApi -> IngRepo : findById(id)
+IngRepo -> DB : SELECT ingredient where id=...
+DB --> IngRepo : row/none
+IngRepo --> IngApi : Ingredient/null
+IngApi --> RT : 200 [Ingredient|null]
+RT --> ClientSvc : Ingredient/null
+ClientSvc --> TestCtl : Ingredient/null
+TestCtl --> Client : 200 [Ingredient|null]
+
+== Delete Ingredient ==
+Client -> TestCtl : DELETE /test/ingredient/delete/{id}
+TestCtl -> ClientSvc : deleteIngredient(id)
+ClientSvc -> RT : DELETE http://localhost:8080/api/ingredients/{id}
+RT -> IngApi : DELETE /api/ingredients/{id}
+IngApi --> RT : 405/404 (no delete mapping here)
+RT --> ClientSvc : error/exception
+ClientSvc --> TestCtl : exception
+TestCtl --> Client : 5xx (unhandled)
+
+note over IngApi
+IngredientController currently supports:
+GET /api/ingredients
+GET /api/ingredients/{id}
+POST /api/ingredients
+(no PUT/DELETE mappings)
+end note
+@enduml

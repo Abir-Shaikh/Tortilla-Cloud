@@ -19,6 +19,16 @@ package "Web MVC Layer (Controllers)" {
   [OrdersCurrentController]
 }
 
+package "REST API Layer (Controllers)" {
+  [IngredientController]
+  [TortillaController]
+  [OrderApiController]
+}
+
+package "Dev/Test REST Layer" {
+  [IngredientClientController]
+}
+
 package "Security Layer" {
   [SecurityConfig]
   [UserRepositoryUserDetailsService]
@@ -29,11 +39,22 @@ package "Security Layer" {
 
 package "Configuration Layer" {
   [OrderProps]
+  [RestConfig]
+  [RabbitConfig]
   [application.properties]
+  [application.yml]
 }
 
 package "Service Layer" {
   [UserDetailsService Contract]
+  [IngredientServiceClient]
+  [RestTemplate]
+}
+
+package "Messaging Layer (AMQP)" {
+  [order.queue]
+  [order.exchange (topic)]
+  [order.# (routing key)]
 }
 
 package "Persistence Layer (Repositories)" {
@@ -49,6 +70,10 @@ package "Domain Model (JPA Entities)" {
   [Tortilla Entity] as TortillaEntity
   [Ingredient Entity] as IngredientEntity
   [Type Enum] as TypeEnum
+}
+
+package "DTO" {
+  [OrderMessage]
 }
 
 package "View Layer (Thymeleaf Templates)" {
@@ -68,6 +93,10 @@ Browser --> [Spring Security Filter Chain]
 [Spring Security Filter Chain] --> [RegistrationController]
 [Spring Security Filter Chain] --> [DesignTortillaController]
 [Spring Security Filter Chain] --> [OrdersCurrentController]
+[Spring Security Filter Chain] --> [IngredientController]
+[Spring Security Filter Chain] --> [TortillaController]
+[Spring Security Filter Chain] --> [OrderApiController]
+[Spring Security Filter Chain] --> [IngredientClientController]
 
 [SecurityConfig] --> [Spring Security Filter Chain]
 [SecurityConfig] --> [UserRepositoryUserDetailsService]
@@ -88,6 +117,19 @@ Browser --> [Spring Security Filter Chain]
 [OrdersCurrentController] --> [OrderRepository]
 [OrdersCurrentController] --> [OrderProps]
 [OrderProps] --> [application.properties]
+[OrderProps] --> [application.yml]
+
+[IngredientController] --> [IngredientRepository]
+[TortillaController] --> [TortillaRepository]
+[OrderApiController] --> [OrderRepository]
+
+[IngredientClientController] --> [IngredientServiceClient]
+[IngredientServiceClient] --> [RestTemplate]
+[RestConfig] --> [RestTemplate]
+
+[RabbitConfig] --> [order.queue]
+[RabbitConfig] --> [order.exchange (topic)]
+[RabbitConfig] --> [order.# (routing key)]
 
 [HomeController] --> [home.html]
 [HomeController] --> [login.html]
@@ -115,4 +157,105 @@ IngredientEntity --> DB
 
 SeedData --> IngredientEntity
 
+@enduml
+
+@startuml TortillaCloud_Domain_Model
+title Tortilla Cloud - Domain Model (JPA)
+left to right direction
+hide empty methods
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+class User <<Entity>> {
+  +Long id
+  +String username
+  +String password
+  +String fullname
+  +String street
+  +String city
+  +String state
+  +String zip
+  +String phoneNumber
+}
+
+class Order <<Entity>> {
+  +Long id
+  +Date placedAt
+  +String name
+  +String street
+  +String city
+  +String state
+  +String zip
+  +String ccNumber
+  +String ccExpiration
+  +String ccCVV
+  +addTortilla(Tortilla)
+  .. lifecycle ..
+  +placedAt()
+}
+
+class Tortilla <<Entity>> {
+  +Long id
+  +String name
+  +Date createdAt
+  .. lifecycle ..
+  +createdAt()
+}
+
+class Ingredient <<Entity>> {
+  +String id
+  +String name
+  +Type type
+}
+
+enum Type {
+  WRAP
+  PROTEIN
+  VEGGIES
+  CHEESE
+  SAUCE
+}
+
+User "1" <-- "0..*" Order : user
+Order "0..*" -- "0..*" Tortilla : tortillas
+Tortilla "0..*" -- "0..*" Ingredient : ingredients
+Ingredient --> Type
+@enduml
+
+@startuml TortillaCloud_Deployment_Integration
+title Tortilla Cloud - Deployment / Integrations
+skinparam shadowing false
+left to right direction
+
+node "Client" {
+  [Browser]
+}
+
+node "Tortilla Cloud (Spring Boot)" as App {
+  [Spring MVC + REST]
+  [Spring Security]
+  [Spring Data JPA]
+  [RestTemplate Client]
+  [AMQP (RabbitConfig)]
+}
+
+database "H2 DB\n(in-memory / local)" as H2
+queue "RabbitMQ Broker" as Rabbit
+
+[Browser] --> App : HTTPS / HTTP
+App --> H2 : JDBC
+App --> Rabbit : AMQP publish/consume\n(order.*)
+
+note right of App
+REST endpoints:
+- /api/ingredients
+- /api/tortillas
+- /api/orders
+MVC pages:
+- /
+- /login
+- /register
+- /design
+- /orders/**
+end note
 @enduml
