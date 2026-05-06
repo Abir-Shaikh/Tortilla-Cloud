@@ -1,8 +1,10 @@
 package com.Tortilla_cloud.configuration;
 
 import org.springframework.amqp.core.*;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 
+@Configuration
 public class RabbitConfig {
 
     //queue names
@@ -26,6 +28,7 @@ public class RabbitConfig {
 
     //bind queue to exchange
     //connects queue to the exchange with a routing key
+    @Bean
     public Binding binding(Queue orderQueue , TopicExchange orderExchange){
         return BindingBuilder.bind(orderQueue)
                 .to(orderExchange)
