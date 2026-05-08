@@ -27,23 +27,32 @@ public class OrderListener {
         log.info("========================================");
 
         //background processing
+        log.info("About to call simulateOrderProcessing for order: {}", message.getOrderId());
+        System.out.println("STDOUT: About to call simulateOrderProcessing for order: " + message.getOrderId());
         simulateOrderProcessing(message);
+        log.info("Returned from simulateOrderProcessing for order: {}", message.getOrderId());
+        System.out.println("STDOUT: Returned from simulateOrderProcessing for order: " + message.getOrderId());
     }
 
     //simulate what the background worker does
     private void simulateOrderProcessing(OrderMessage message) {
         try {
             log.info("Starting order processing for order: {}" , message.getOrderId());
+            System.out.println("STDOUT: Starting order processing for order: " + message.getOrderId());
 
             Thread.sleep(2000);
 
             log.info("Order #{} processed successfully" , message.getOrderId());
             log.info("Confirmation email sent to: {}" , message.getCustomerEmail());
             log.info("Inventory updated");
+            System.out.println("STDOUT: Order processed for order: " + message.getOrderId());
         }
-        catch (InterruptedException e){
-            log.error("Error processing order" , e);
-            Thread.currentThread().interrupt();
+        catch (Exception e){
+            log.error("simulateOrderProcessing failed" , e);
+            // Re-interrupt only when applicable; keeps original behavior for InterruptedException.
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
