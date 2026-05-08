@@ -22,7 +22,8 @@ public class OrderPublisher {
 
         rabbitTemplate.convertAndSend(
                 RabbitConfig.ORDER_EXACHANGE ,
-                RabbitConfig.ORDER_ROUTING_KEY ,
+                // Send with a concrete routing key; the queue is bound with "order.#".
+                "order.created" ,
                 message
         );
 
