@@ -3,6 +3,7 @@ package com.Tortilla_cloud.controller.restController;
 import com.Tortilla_cloud.model.Order;
 import com.Tortilla_cloud.model.User;
 import com.Tortilla_cloud.repository.OrderRepository;
+import com.Tortilla_cloud.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,9 +24,11 @@ import java.util.Map;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
-    public OrderApiController(OrderRepository orderRepository) {
+    public OrderApiController(OrderRepository orderRepository, OrderService orderService) {
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     //get all orders
@@ -44,8 +47,8 @@ public class OrderApiController {
 
         Pageable pageable = PageRequest.of(page , size , Sort.by(sortDirection , sortBy));
 
-        Page<Order> orders = orderRepository.findByUser(user , pageable);
-        log.info("Fetched {} orders for user: {}" , page , size , user.getUsername());
+        Page<Order> orders = orderService.getUserOrders(user, pageable);
+        log.info("Fetched {} orders for user: {}", orders.getNumberOfElements(), user.getUsername());
         return new ResponseEntity<>(orders , HttpStatus.OK);
     }
 
@@ -71,9 +74,8 @@ public class OrderApiController {
             log.warn("Unauthorized POST to /api/orders");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        order.setUser(user);
         log.info("Creating new order for user: {}" , user.getUsername());
-        Order save = orderRepository.save(order);
-        return new ResponseEntity<>(save , HttpStatus.CREATED);
+        Order saved = orderService.createOrder(order, user);
+        return new ResponseEntity<>(saved , HttpStatus.CREATED);
     }
 }
