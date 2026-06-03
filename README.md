@@ -2,7 +2,7 @@
 
 > A Spring Boot 3 web application for designing custom tortillas, placing orders, and managing order history with user authentication and real-time tracking.
 
-**Tortilla Cloud** is a feature-rich e-commerce platform that enables users to build custom tortillas by selecting ingredients, place orders, and track their order history. Built with modern Spring Boot technologies, it provides a secure, scalable foundation for a tortilla ordering service.
+**Tortilla Cloud** is a feature-rich ecommerce platform that enables users to build custom tortillas by selecting ingredients, place orders, and track their order history. Built with modern Spring Boot technologies, it provides a secure, scalable foundation for a tortilla ordering service.
 
 ---
 
