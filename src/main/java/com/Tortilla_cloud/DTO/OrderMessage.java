@@ -23,7 +23,7 @@ public class OrderMessage implements Serializable {
         return new OrderMessage(
                 orderId,
                 customerName,
-                customerName.toLowerCase().replace("" , ".") + "@tortillacloud.com",
+                customerName.toLowerCase().replace(" " , ".") + "@tortillacloud.com",
                 city,
                 state,
                 "New Order placed",
