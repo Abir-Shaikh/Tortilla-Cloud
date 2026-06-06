@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.model;
+package com.Tortilla_cloud.backend.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
