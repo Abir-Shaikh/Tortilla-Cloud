@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.configuration;
+package com.Tortilla_cloud.backend.configuration;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;

@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.configuration;
+package com.Tortilla_cloud.backend.configuration;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

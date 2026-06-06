@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.configuration;
+package com.Tortilla_cloud.backend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
