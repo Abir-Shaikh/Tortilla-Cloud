@@ -1,6 +1,6 @@
-package com.Tortilla_cloud.security;
+package com.Tortilla_cloud.backend.security;
 
-import com.Tortilla_cloud.model.User;
+import com.Tortilla_cloud.backend.model.User;
 import lombok.Data;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

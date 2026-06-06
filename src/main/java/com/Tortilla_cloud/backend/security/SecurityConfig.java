@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.security;
+package com.Tortilla_cloud.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
