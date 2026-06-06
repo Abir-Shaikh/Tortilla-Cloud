@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.controller;
+package com.Tortilla_cloud.backend.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

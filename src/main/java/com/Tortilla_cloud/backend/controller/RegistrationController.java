@@ -1,7 +1,7 @@
-package com.Tortilla_cloud.controller;
+package com.Tortilla_cloud.backend.controller;
 
-import com.Tortilla_cloud.repository.UserRepository;
-import com.Tortilla_cloud.security.RegistrationForm;
+import com.Tortilla_cloud.backend.repository.UserRepository;
+import com.Tortilla_cloud.backend.security.RegistrationForm;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

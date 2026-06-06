@@ -1,8 +1,8 @@
-package com.Tortilla_cloud.controller.testingAPIController;
+package com.Tortilla_cloud.backend.controller.testingAPIController;
 
-import com.Tortilla_cloud.model.Ingredient;
-import com.Tortilla_cloud.model.Type;
-import com.Tortilla_cloud.service.IngredientServiceClient;
+import com.Tortilla_cloud.backend.model.Ingredient;
+import com.Tortilla_cloud.backend.model.Type;
+import com.Tortilla_cloud.backend.service.IngredientServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,7 +1,7 @@
-package com.Tortilla_cloud.controller.restController;
+package com.Tortilla_cloud.backend.controller.restController;
 
-import com.Tortilla_cloud.model.Tortilla;
-import com.Tortilla_cloud.repository.TortillaRepository;
+import com.Tortilla_cloud.backend.model.Tortilla;
+import com.Tortilla_cloud.backend.repository.TortillaRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

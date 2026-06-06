@@ -1,7 +1,7 @@
-package com.Tortilla_cloud.controller.restController;
+package com.Tortilla_cloud.backend.controller.restController;
 
-import com.Tortilla_cloud.model.Ingredient;
-import com.Tortilla_cloud.repository.IngredientRepository;
+import com.Tortilla_cloud.backend.model.Ingredient;
+import com.Tortilla_cloud.backend.repository.IngredientRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,10 +1,9 @@
-package com.Tortilla_cloud.controller;
+package com.Tortilla_cloud.backend.controller;
 
-import com.Tortilla_cloud.model.Ingredient;
-import com.Tortilla_cloud.model.Tortilla;
-import com.Tortilla_cloud.model.Type;
-import com.Tortilla_cloud.repository.IngredientRepository;
-import com.Tortilla_cloud.repository.TortillaRepository;
+import com.Tortilla_cloud.backend.model.Tortilla;
+import com.Tortilla_cloud.backend.model.Type;
+import com.Tortilla_cloud.backend.repository.IngredientRepository;
+import com.Tortilla_cloud.backend.repository.TortillaRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -14,9 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Controller
