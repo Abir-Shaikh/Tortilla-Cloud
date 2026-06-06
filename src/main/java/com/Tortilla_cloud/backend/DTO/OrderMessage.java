@@ -1,4 +1,4 @@
-package com.Tortilla_cloud.DTO;
+package com.Tortilla_cloud.backend.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
