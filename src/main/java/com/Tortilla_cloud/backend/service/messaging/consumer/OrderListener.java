@@ -1,7 +1,7 @@
-package com.Tortilla_cloud.service.messaging.consumer;
+package com.Tortilla_cloud.backend.service.messaging.consumer;
 
-import com.Tortilla_cloud.DTO.OrderMessage;
-import com.Tortilla_cloud.configuration.RabbitConfig;
+import com.Tortilla_cloud.backend.DTO.OrderMessage;
+import com.Tortilla_cloud.backend.configuration.RabbitConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;

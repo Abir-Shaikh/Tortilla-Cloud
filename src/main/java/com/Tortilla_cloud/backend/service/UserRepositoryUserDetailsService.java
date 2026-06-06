@@ -1,7 +1,7 @@
-package com.Tortilla_cloud.service;
+package com.Tortilla_cloud.backend.service;
 
-import com.Tortilla_cloud.model.User;
-import com.Tortilla_cloud.repository.UserRepository;
+import com.Tortilla_cloud.backend.model.User;
+import com.Tortilla_cloud.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
