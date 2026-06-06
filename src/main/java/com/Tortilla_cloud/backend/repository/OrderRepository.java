@@ -1,13 +1,12 @@
-package com.Tortilla_cloud.repository;
+package com.Tortilla_cloud.backend.repository;
 
-import com.Tortilla_cloud.model.Order;
-import com.Tortilla_cloud.model.User;
+import com.Tortilla_cloud.backend.model.Order;
+import com.Tortilla_cloud.backend.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import java.util.Date;
 import java.util.List;
 
 public interface OrderRepository extends CrudRepository<Order , Long> , PagingAndSortingRepository<Order , Long> {

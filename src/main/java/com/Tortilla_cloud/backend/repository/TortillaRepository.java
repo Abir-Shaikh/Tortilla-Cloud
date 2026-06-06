@@ -1,6 +1,6 @@
-package com.Tortilla_cloud.repository;
+package com.Tortilla_cloud.backend.repository;
 
-import com.Tortilla_cloud.model.Tortilla;
+import com.Tortilla_cloud.backend.model.Tortilla;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
