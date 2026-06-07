@@ -1,5 +1,7 @@
 package com.Tortilla_cloud.backend.configuration;
 
+import com.Tortilla_cloud.backend.DTO.OrderMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
@@ -7,6 +9,7 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.messaging.MessageChannel;
 
+@Slf4j
 @Configuration
 @EnableIntegration
 public class IntegrationConfig {
@@ -39,7 +42,7 @@ public class IntegrationConfig {
     public IntegrationFlow orderProcessingFlow(){
         return IntegrationFlow
                 .from("orderInputChannel")
-                .filter(message -> isOrderValid(message))//validate
+                .filter(message -> isOrderValid(message) )//validate
                 .channel("validOrderChannel")
                 .get();
     }
@@ -56,6 +59,19 @@ public class IntegrationConfig {
     }
 
     private boolean isOrderValid(Object message) {
+
+        //checking validation
+        if (!(message instanceof OrderMessage)) {
+            log.warn("order is null");
+            return false;
+        }
+
+        OrderMessage order = (OrderMessage) message;
+
+        if (order.getOrderId() == null) {
+            log.warn("Missing order Id");
+            return false;
+        }
         return true;
     }
 }
