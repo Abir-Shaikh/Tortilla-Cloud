@@ -3,12 +3,22 @@ package com.Tortilla_cloud.backend.service.messaging.producer;
 import com.Tortilla_cloud.backend.DTO.OrderMessage;
 import com.Tortilla_cloud.backend.configuration.RabbitConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class OrderPublisher {
+
+    @Autowired
+    @Qualifier("orderInputChannel")
+    private MessageChannel orderInputChannel;
+
     private final RabbitTemplate rabbitTemplate;
 
     public OrderPublisher(RabbitTemplate rabbitTemplate) {
@@ -16,18 +26,12 @@ public class OrderPublisher {
     }
 
     //sending order message to queue
-    public void publishOrderMessage(OrderMessage message){
-        log.info("Publishing order message for Order ID: {}" , message.getOrderId());
+    public void publishOrderMessage(OrderMessage msg){
 
-
-        rabbitTemplate.convertAndSend(
-                RabbitConfig.ORDER_EXACHANGE ,
-                // Send with a concrete routing key; the queue is bound with "order.#".
-                "order.created" ,
-                message
-        );
-
-
-        log.info("Order message published successfully");
+        Message<OrderMessage> message = MessageBuilder
+                .withPayload(msg)
+                .setHeader("timestamp", System.currentTimeMillis())
+                .build();
+        orderInputChannel.send(message);
     }
 }
