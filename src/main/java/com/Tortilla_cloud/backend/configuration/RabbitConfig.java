@@ -14,7 +14,7 @@ public class RabbitConfig {
 
     //queue names
     public static final String ORDER_QUEUE = "order.queue";
-    public static final String ORDER_EXACHANGE = "order.exchange";
+    public static final String ORDER_EXCHANGE = "order.exchange";
     public static final String ORDER_ROUTING_KEY = "order.#";
 
     //create queue
@@ -28,7 +28,7 @@ public class RabbitConfig {
     //here we receive messages and routes them to queues
     @Bean
     public TopicExchange orderExchange(){
-        return new TopicExchange(ORDER_EXACHANGE , true , false);
+        return new TopicExchange(ORDER_EXCHANGE, true , false);
     }
 
     //bind queue to exchange
