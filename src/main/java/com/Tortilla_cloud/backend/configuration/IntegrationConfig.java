@@ -42,7 +42,8 @@ public class IntegrationConfig {
     public IntegrationFlow orderProcessingFlow(){
         return IntegrationFlow
                 .from("orderInputChannel")
-                .filter(message -> isOrderValid(message) )//validate
+                .filter(message -> isOrderValid(message),
+                        e -> e.discardChannel("invalidOrderChannel"))//validate
                 .channel("validOrderChannel")
                 .get();
     }
