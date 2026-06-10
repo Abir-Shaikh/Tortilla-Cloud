@@ -3,12 +3,19 @@ package com.Tortilla_cloud.backend.service.messaging.consumer;
 import com.Tortilla_cloud.backend.DTO.OrderMessage;
 import com.Tortilla_cloud.backend.configuration.RabbitConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class OrderListener {
+
+    @Autowired
+    private MessageChannel orderInputChannel;
 
     //this method calls automatically when a message arrives don't need to write any loop statement
     @RabbitListener(
@@ -26,12 +33,14 @@ public class OrderListener {
         log.info("Timestamp: {}" , message.getTimestamp());
         log.info("========================================");
 
-        //background processing
-        log.info("About to call simulateOrderProcessing for order: {}", message.getOrderId());
-        System.out.println("STDOUT: About to call simulateOrderProcessing for order: " + message.getOrderId());
-        simulateOrderProcessing(message);
-        log.info("Returned from simulateOrderProcessing for order: {}", message.getOrderId());
-        System.out.println("STDOUT: Returned from simulateOrderProcessing for order: " + message.getOrderId());
+        Message<OrderMessage> integrationMessage = MessageBuilder
+                .withPayload(message)
+                .setHeader("timestamp", System.currentTimeMillis())
+                .setHeader("orderSource", "rabbitmq")
+                .build();
+
+        orderInputChannel.send(integrationMessage);
+        log.info("Order sent to integration channel: {}", message.getOrderId());
     }
 
     //simulate what the background worker does
