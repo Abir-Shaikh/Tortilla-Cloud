@@ -8,106 +8,96 @@ skinparam packageStyle rectangle
 
 actor "Browser User" as Browser
 
-package "Entry / Bootstrapping" {
+package "Application Root: com.Tortilla_cloud" {
   [TortillaCloudApplication]
+  package "backend" {
+    package "configuration (com.Tortilla_cloud.backend.configuration)" {
+      [IntegrationConfig]
+      [OrderProps]
+      [RabbitConfig]
+      [RestConfig]
+    }
+    package "controller (com.Tortilla_cloud.backend.controller)" {
+      [HomeController]
+      [RegistrationController]
+      [DesignTortillaController]
+      [OrdersCurrentController]
+      package "restController" {
+        [IngredientController]
+        [TortillaController]
+        [OrderApiController]
+      }
+      package "testingAPIController" {
+        [IngredientClientController]
+      }
+    }
+    package "service (com.Tortilla_cloud.backend.service)" {
+      [IngredientServiceClient]
+      [OrderService]
+      [UserRepositoryUserDetailsService]
+      [RestTemplate]
+    }
+    package "repository (com.Tortilla_cloud.backend.repository)" {
+      [UserRepository]
+      [IngredientRepository]
+      [TortillaRepository]
+      [OrderRepository]
+    }
+    package "security (com.Tortilla_cloud.backend.security)" {
+      [SecurityConfig]
+      [RegistrationForm]
+    }
+    package "model (com.Tortilla_cloud.backend.model)" {
+      [User Entity] as UserEntity
+      [Order Entity] as OrderEntity
+      [Tortilla Entity] as TortillaEntity
+      [Ingredient Entity] as IngredientEntity
+      [Type Enum] as TypeEnum
+    }
+    package "DTO (com.Tortilla_cloud.backend.DTO)" {
+      [OrderMessage]
+    }
+  }
 }
 
-package "Web MVC Layer (Controllers)" {
-  [HomeController]
-  [RegistrationController]
-  [DesignTortillaController]
-  [OrdersCurrentController]
-}
-
-package "REST API Layer (Controllers)" {
-  [IngredientController]
-  [TortillaController]
-  [OrderApiController]
-}
-
-package "Dev/Test REST Layer" {
-  [IngredientClientController]
-}
-
-package "Security Layer" {
-  [SecurityConfig]
-  [UserRepositoryUserDetailsService]
-  [RegistrationForm]
-  [PasswordEncoder (BCrypt)]
-  [Spring Security Filter Chain]
-}
-
-package "Configuration Layer" {
-  [OrderProps]
-  [RestConfig]
-  [RabbitConfig]
+package "Resources (src/main/resources)" {
+  package "templates" {
+    [home.html]
+    [login.html]
+    [registration.html]
+    [design.html]
+    [orderForm.html]
+    [orderList.html]
+  }
+  package "static" {
+    [images]
+    [menu]
+    [buttons]
+  }
   [application.properties]
   [application.yml]
-}
-
-package "Service Layer" {
-  [UserDetailsService Contract]
-  [IngredientServiceClient]
-  [RestTemplate]
-}
-
-package "Messaging Layer (AMQP)" {
-  [order.queue]
-  [order.exchange (topic)]
-  [order.# (routing key)]
-}
-
-package "Persistence Layer (Repositories)" {
-  [UserRepository]
-  [IngredientRepository]
-  [TortillaRepository]
-  [OrderRepository]
-}
-
-package "Domain Model (JPA Entities)" {
-  [User Entity] as UserEntity
-  [Order Entity] as OrderEntity
-  [Tortilla Entity] as TortillaEntity
-  [Ingredient Entity] as IngredientEntity
-  [Type Enum] as TypeEnum
-}
-
-package "DTO" {
-  [OrderMessage]
-}
-
-package "View Layer (Thymeleaf Templates)" {
-  [home.html]
-  [login.html]
-  [registration.html]
-  [design.html]
-  [orderForm.html]
-  [orderList.html]
+  collections "data.sql" as SeedData
 }
 
 database "H2 In-Memory DB" as DB
-collections "data.sql" as SeedData
 
-Browser --> [Spring Security Filter Chain]
-[Spring Security Filter Chain] --> [HomeController]
-[Spring Security Filter Chain] --> [RegistrationController]
-[Spring Security Filter Chain] --> [DesignTortillaController]
-[Spring Security Filter Chain] --> [OrdersCurrentController]
-[Spring Security Filter Chain] --> [IngredientController]
-[Spring Security Filter Chain] --> [TortillaController]
-[Spring Security Filter Chain] --> [OrderApiController]
-[Spring Security Filter Chain] --> [IngredientClientController]
+Browser --> [SecurityConfig]
+[SecurityConfig] --> [HomeController]
+[SecurityConfig] --> [RegistrationController]
+[SecurityConfig] --> [DesignTortillaController]
+[SecurityConfig] --> [OrdersCurrentController]
+[SecurityConfig] --> [IngredientController]
+[SecurityConfig] --> [TortillaController]
+[SecurityConfig] --> [OrderApiController]
+[SecurityConfig] --> [IngredientClientController]
 
-[SecurityConfig] --> [Spring Security Filter Chain]
 [SecurityConfig] --> [UserRepositoryUserDetailsService]
-[SecurityConfig] --> [PasswordEncoder (BCrypt)]
+[SecurityConfig] --> [RegistrationForm]
 
-[UserRepositoryUserDetailsService] ..> [UserDetailsService Contract]
-[UserRepositoryUserDetailsService] --> [UserRepository]
+[UserRepositoryUserDetailsService] ..> [UserRepository]
 
 [RegistrationController] --> [RegistrationForm]
-[RegistrationForm] --> [PasswordEncoder (BCrypt)]
-[RegistrationForm] --> UserEntity : creates
+[RegistrationForm] --> [User Entity] : creates
 [RegistrationController] --> [UserRepository]
 
 [DesignTortillaController] --> [IngredientRepository]
@@ -127,9 +117,9 @@ Browser --> [Spring Security Filter Chain]
 [IngredientServiceClient] --> [RestTemplate]
 [RestConfig] --> [RestTemplate]
 
-[RabbitConfig] --> [order.queue]
-[RabbitConfig] --> [order.exchange (topic)]
-[RabbitConfig] --> [order.# (routing key)]
+[RabbitConfig] --> "order.queue"
+[RabbitConfig] --> "order.exchange (topic)"
+[RabbitConfig] --> "order.# (routing key)"
 
 [HomeController] --> [home.html]
 [HomeController] --> [login.html]
@@ -157,105 +147,4 @@ IngredientEntity --> DB
 
 SeedData --> IngredientEntity
 
-@enduml
-
-@startuml TortillaCloud_Domain_Model
-title Tortilla Cloud - Domain Model (JPA)
-left to right direction
-hide empty methods
-skinparam shadowing false
-skinparam classAttributeIconSize 0
-
-class User <<Entity>> {
-  +Long id
-  +String username
-  +String password
-  +String fullname
-  +String street
-  +String city
-  +String state
-  +String zip
-  +String phoneNumber
-}
-
-class Order <<Entity>> {
-  +Long id
-  +Date placedAt
-  +String name
-  +String street
-  +String city
-  +String state
-  +String zip
-  +String ccNumber
-  +String ccExpiration
-  +String ccCVV
-  +addTortilla(Tortilla)
-  .. lifecycle ..
-  +placedAt()
-}
-
-class Tortilla <<Entity>> {
-  +Long id
-  +String name
-  +Date createdAt
-  .. lifecycle ..
-  +createdAt()
-}
-
-class Ingredient <<Entity>> {
-  +String id
-  +String name
-  +Type type
-}
-
-enum Type {
-  WRAP
-  PROTEIN
-  VEGGIES
-  CHEESE
-  SAUCE
-}
-
-User "1" <-- "0..*" Order : user
-Order "0..*" -- "0..*" Tortilla : tortillas
-Tortilla "0..*" -- "0..*" Ingredient : ingredients
-Ingredient --> Type
-@enduml
-
-@startuml TortillaCloud_Deployment_Integration
-title Tortilla Cloud - Deployment / Integrations
-skinparam shadowing false
-left to right direction
-
-node "Client" {
-  [Browser]
-}
-
-node "Tortilla Cloud (Spring Boot)" as App {
-  [Spring MVC + REST]
-  [Spring Security]
-  [Spring Data JPA]
-  [RestTemplate Client]
-  [AMQP (RabbitConfig)]
-}
-
-database "H2 DB\n(in-memory / local)" as H2
-queue "RabbitMQ Broker" as Rabbit
-
-[Browser] --> App : HTTPS / HTTP
-App --> H2 : JDBC
-App --> Rabbit : AMQP publish/consume\n(order.*)
-
-note right of App
-REST endpoints:
-- /api/ingredients
-- /api/tortillas
-- /api/orders
-MVC pages:
-- /
-- /login
-- /register
-- /design
-- /orders/**
-end note
 @enduml
