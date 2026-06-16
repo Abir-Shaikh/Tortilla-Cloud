@@ -1,7 +1,6 @@
 package com.Tortilla_cloud.backend.service.messaging.producer;
 
 import com.Tortilla_cloud.backend.DTO.OrderMessage;
-import com.Tortilla_cloud.backend.configuration.RabbitConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,7 +29,7 @@ public class OrderPublisher {
 
         Message<OrderMessage> message = MessageBuilder
                 .withPayload(msg)
-                .setHeader("timestamp", System.currentTimeMillis())
+                .setHeader("publishedTime", System.currentTimeMillis())
                 .build();
         orderInputChannel.send(message);
     }
