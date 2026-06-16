@@ -44,7 +44,7 @@ public class OrderListener {
     }
 
     //simulate what the background worker does
-    private void simulateOrderProcessing(OrderMessage message) {
+    public void simulateOrderProcessing(OrderMessage message) {
         try {
             log.info("Starting order processing for order: {}" , message.getOrderId());
             System.out.println("STDOUT: Starting order processing for order: " + message.getOrderId());
