@@ -1,13 +1,18 @@
 package com.Tortilla_cloud.backend.configuration;
 
 import com.Tortilla_cloud.backend.DTO.OrderMessage;
+import com.Tortilla_cloud.backend.service.messaging.consumer.OrderListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 
 @Slf4j
 @Configuration
@@ -37,7 +42,7 @@ public class IntegrationConfig {
         return new DirectChannel();
     }
 
-    //take input -> validate -> route -> output
+    //Flow -> take input -> validate -> route -> output
     @Bean
     public IntegrationFlow orderProcessingFlow(){
         return IntegrationFlow
@@ -48,31 +53,83 @@ public class IntegrationConfig {
                 .get();
     }
 
-    //same as validation but here we just have to print smth
+    //valid Order Handler -> handles valid orders
+
     @Bean
-    public IntegrationFlow invalidOrderFlow(){
-        return IntegrationFlow
-                .from("orderInputChannel")
-                .filter(message -> !isOrderValid(message))
-                .channel("invalidOrderChannel")
-                .handle(msg -> System.out.println("Inavalid : " + msg.getPayload()))
-                .get();
+    @ServiceActivator(inputChannel = "validOrderChannel")
+    public MessageHandler orderHandler(OrderListener orderListener){
+        return message -> {
+            try {
+                OrderMessage order = (OrderMessage) message.getPayload();
+                log.info("Integration processing Order: {}" , order.getOrderId());
+                orderListener.simulateOrderProcessing(order);
+
+                log.info("Integration Completed order: {}", order.getOrderId());
+            } catch (Exception e) {
+                log.error("Handler Error: ", e);
+                throw new MessagingException(message , e);
+            }
+        };
     }
 
-    private boolean isOrderValid(Object message) {
+    //invalid order handler -> handles invalid order
 
-        //checking validation
-        if (!(message instanceof OrderMessage)) {
-            log.warn("order is null");
+    @Bean
+    @ServiceActivator(inputChannel = "invalidOrderChannel")
+    public MessageHandler invalidOrderHandler(){
+        return message -> {
+            OrderMessage order = (OrderMessage) message.getPayload();
+            log.warn("Invalid Order Rejected: {}", order.getOrderId());
+        };
+    }
+
+    //error handler -> handles errors
+
+    @Bean
+    @ServiceActivator(inputChannel = "errorChannel")
+    public MessageHandler errorHandler(){
+        return message -> {
+            log.error("Integration Error: {}", message.getPayload());
+        };
+    }
+
+
+    //validation logic
+    private boolean isOrderValid(Object messageObj) {
+        try {
+            Message<?> message = (Message<?>)  messageObj;
+            OrderMessage order = (OrderMessage) message.getPayload();
+
+            if (order.getOrderId() == null) {
+                log.warn("Invalid: Missing Order Id");
+                return false;
+            }
+            if (order.getCustomerEmail() == null || order.getCustomerEmail().isEmpty()) {
+                log.warn("Invalid! Missing Email");
+                return false;
+            }
+            return true;
+        }
+        catch (Exception e){
+            log.error("Validation Error", e);
             return false;
         }
-
-        OrderMessage order = (OrderMessage) message;
-
-        if (order.getOrderId() == null) {
-            log.warn("Missing order Id");
-            return false;
-        }
-        return true;
     }
 }
+
+
+
+//        //checking validation
+//        if (!(message instanceof OrderMessage)) {
+//            log.warn("order is null");
+//            return false;
+//        }
+//
+//        OrderMessage order = (OrderMessage) message;
+//
+//        if (order.getOrderId() == null) {
+//            log.warn("Missing order Id");
+//            return false;
+//        }
+//        return true;
+//    }
